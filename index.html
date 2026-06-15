@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0e1116" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Padelsluts" />
+<meta name="description" content="Americano padel tournaments — random partners every round, one winner." />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="apple-touch-icon-180.png" />
+<title>Padelsluts</title>
+<style>
+  :root{
+    --bg:#0e1116; --card:#181d26; --card2:#1f2632; --line:#2a3340;
+    --txt:#eef2f7; --muted:#8b94a3; --accent:#c8ff32; --accent-d:#a6db18;
+    --cyan:#34e1eb; --danger:#ff5a5f; --gold:#ffd34d;
+    --radius:16px; --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #16202b 0%, var(--bg) 55%) fixed;
+    color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.45; padding:env(safe-area-inset-top) 0 64px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:18px 16px}
+  header.app{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
+  .logo{font-size:30px;line-height:1}
+  .title{font-weight:900;letter-spacing:-.5px;font-size:28px}
+  .title b{color:var(--accent)}
+  .tag{color:var(--muted);font-size:12.5px;margin-top:-2px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:14px 0;box-shadow:var(--shadow)}
+  .card h2{margin:0 0 12px;font-size:16px;letter-spacing:.2px}
+  .row{display:flex;gap:10px;align-items:center}
+  label.fld{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.6px}
+  input,button,select{font-family:inherit;font-size:16px}
+  input[type=text],input[type=number]{
+    width:100%;background:var(--card2);border:1px solid var(--line);color:var(--txt);
+    border-radius:12px;padding:13px 14px;outline:none;transition:border-color .15s,box-shadow .15s;
+  }
+  input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,255,50,.15)}
+  .btn{border:none;border-radius:12px;padding:13px 16px;font-weight:800;cursor:pointer;transition:transform .04s,filter .15s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:var(--accent);color:#0c1208}
+  .btn.primary:hover{filter:brightness(1.05)}
+  .btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line)}
+  .btn.cyan{background:var(--cyan);color:#03242a}
+  .btn.block{width:100%}
+  .btn.lg{padding:16px;font-size:17px}
+  .btn.sm{padding:8px 12px;font-size:13px;border-radius:10px}
+  .btn.danger{background:transparent;color:var(--danger);border:1px solid rgba(255,90,95,.4)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{background:var(--card2);border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer}
+  .chip.on{background:var(--accent);color:#0c1208;border-color:var(--accent)}
+  .ranktoggle{display:inline-flex;align-items:center;gap:7px}
+  .ranktoggle .rl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:800;margin-right:2px}
+  .ranktoggle .chip{padding:6px 12px}
+  th.active{color:var(--accent)}
+  td.active{color:var(--accent);font-weight:800}
+  .players{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .ptag{display:inline-flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:7px 8px 7px 14px;font-weight:700}
+  .ptag .x{width:22px;height:22px;border-radius:50%;background:#2c3543;color:var(--muted);border:none;cursor:pointer;font-size:14px;line-height:1;display:grid;place-items:center}
+  .ptag .x:hover{background:var(--danger);color:#fff}
+  .muted{color:var(--muted)}
+  .small{font-size:12.5px}
+  .err{color:var(--danger);font-size:13px;margin-top:8px;min-height:0}
+  .split{display:flex;gap:12px}
+  .split>div{flex:1}
+  .pill{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--muted)}
+  .progress{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 2px}
+  .bar{height:7px;background:var(--card2);border-radius:999px;overflow:hidden;flex:1}
+  .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--accent));border-radius:999px;transition:width .3s}
+
+  .court{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+  .court .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .court .ch .name{font-weight:800;letter-spacing:.3px}
+  .court .ch .tag{font-size:11px}
+  .team{display:flex;align-items:center;gap:10px;padding:9px 0}
+  .team .names{flex:1;font-weight:700;font-size:15.5px}
+  .team .names .amp{color:var(--muted);font-weight:600;margin:0 4px}
+  .score{width:72px;text-align:center;font-size:22px;font-weight:800;padding:10px 6px}
+  .vs{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+  .vs:before,.vs:after{content:"";height:1px;background:var(--line);flex:1}
+  .win{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .winbadge{color:var(--accent);font-weight:800;font-size:11px;margin-left:8px}
+  .byes{margin-top:10px;font-size:13px;color:var(--muted)}
+  .byes b{color:var(--txt)}
+
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th,td{padding:11px 8px;text-align:left;border-bottom:1px solid var(--line);font-size:14.5px}
+  th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;font-weight:800}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.me td{}
+  .rank{font-weight:900;width:34px}
+  .top1 td{background:linear-gradient(90deg,rgba(200,255,50,.12),transparent)}
+  .winnerbanner{text-align:center;background:linear-gradient(160deg,#202a16,#181d26);border:1px solid var(--accent-d);border-radius:var(--radius);padding:22px 16px;margin:14px 0}
+  .winnerbanner .crown{font-size:40px}
+  .winnerbanner .wname{font-size:26px;font-weight:900;margin:6px 0 2px}
+  .winnerbanner .wstat{color:var(--accent)}
+  .footer{ text-align:center;color:var(--muted);font-size:11.5px;margin-top:20px}
+  .actions{display:flex;gap:10px;margin-top:8px}
+  .actions .btn{flex:1}
+  .stack{display:flex;flex-direction:column;gap:10px}
+  .live th,.live td{padding:7px 8px;font-size:13px}
+  .hr{height:1px;background:var(--line);margin:14px 0;border:0}
+  details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:700;list-style:none}
+  details summary::-webkit-details-marker{display:none}
+  details summary:before{content:"▸ ";color:var(--accent)}
+  details[open] summary:before{content:"▾ "}
+  @media (max-width:420px){ .title{font-size:24px} .score{width:62px;font-size:20px} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="app">
+      <div class="logo">🎾</div>
+      <div>
+        <div class="title">Padel<b>sluts</b></div>
+        <div class="tag">Americano padel · random partners every round · one winner</div>
+      </div>
+    </header>
+    <div id="app"></div>
+    <div class="footer">Auto-saved on this device · works offline 🟢</div>
+  </div>
+
+<script>
+"use strict";
+
+/* ---------- state ---------- */
+const KEY = "padelsluts.v1";
+const DEFAULT = { players:[], pointsPerMatch:24, numRounds:5, rounds:[], currentRound:0, phase:"setup", rankBy:"points" };
+let state = load();
+
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if(s && typeof s==="object") return Object.assign({}, DEFAULT, s);
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT));
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+/* ---------- helpers ---------- */
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function pName(id){ const p=state.players.find(x=>x.id===id); return p?esc(p.name):"?"; }
+function plural(n,w){ return n+" "+w+(n===1?"":"s"); }
+
+/* ---------- round generation (random + fair byes) ---------- */
+function buildRound(){
+  const ids = state.players.map(p=>p.id);
+  const byeCount = {}; ids.forEach(id=>byeCount[id]=0);
+  state.rounds.forEach(r => r.byes.forEach(id => { if(byeCount[id]!=null) byeCount[id]++; }));
+  const n = ids.length;
+  const byesNeeded = n % 4;
+  // fewest byes so far go first to play; ties broken randomly (shuffle then stable sort)
+  const ordered = shuffle(ids).sort((a,b)=> byeCount[a]-byeCount[b]);
+  const byes = ordered.slice(0, byesNeeded);
+  const playing = shuffle(ordered.slice(byesNeeded));
+  const courts = [];
+  for(let i=0;i<playing.length;i+=4){
+    courts.push({ teamA:[playing[i],playing[i+1]], teamB:[playing[i+2],playing[i+3]], scoreA:null, scoreB:null });
+  }
+  return { courts, byes };
+}
+
+/* ---------- standings ---------- */
+function computeStandings(){
+  const stats={};
+  state.players.forEach(p=> stats[p.id]={id:p.id,name:p.name,wins:0,points:0,played:0,draws:0});
+  state.rounds.forEach(r=> r.courts.forEach(c=>{
+    if(c.scoreA==null||c.scoreB==null) return;
+    const aWin=c.scoreA>c.scoreB, bWin=c.scoreB>c.scoreA;
+    c.teamA.forEach(id=>{ if(stats[id]){ stats[id].points+=c.scoreA; stats[id].played++; if(aWin)stats[id].wins++; else if(!bWin)stats[id].draws++; }});
+    c.teamB.forEach(id=>{ if(stats[id]){ stats[id].points+=c.scoreB; stats[id].played++; if(bWin)stats[id].wins++; else if(!aWin)stats[id].draws++; }});
+  }));
+  const byPoints=(a,b)=> b.points-a.points || b.wins-a.wins || a.name.localeCompare(b.name);
+  const byWins=(a,b)=> b.wins-a.wins || b.points-a.points || a.name.localeCompare(b.name);
+  return Object.values(stats).sort(state.rankBy==="wins"?byWins:byPoints);
+}
+
+/* ---------- actions ---------- */
+function addPlayer(){
+  const inp=document.getElementById("nameInput");
+  const name=(inp.value||"").trim();
+  const err=document.getElementById("setupErr");
+  if(!name){ inp.focus(); return; }
+  if(state.players.some(p=>p.name.toLowerCase()===name.toLowerCase())){ err.textContent="“"+name+"” is already in the list."; return; }
+  state.players.push({id:uid(), name}); err.textContent="";
+  save(); render();
+  const ni=document.getElementById("nameInput"); if(ni){ ni.value=""; ni.focus(); }
+}
+function removePlayer(id){ state.players=state.players.filter(p=>p.id!==id); save(); render(); }
+function setPoints(v){ state.pointsPerMatch=v; save(); render(); }
+function setRounds(v){ state.numRounds=v; save(); render(); }
+function setRankBy(v){ state.rankBy=v; save(); if(state.phase==="play") refreshLive(); else render(); }
+function rankToggleHTML(){
+  const byPts=state.rankBy!=="wins";
+  return `<span class="ranktoggle"><span class="rl">Rank by</span>`+
+    `<span class="chip ${byPts?'on':''}" onclick="setRankBy('points')">Points</span>`+
+    `<span class="chip ${!byPts?'on':''}" onclick="setRankBy('wins')">Wins</span></span>`;
+}
+
+function startTournament(){
+  const err=document.getElementById("setupErr");
+  const pts=Math.max(2, Math.round(+document.getElementById("pointsInput").value||0));
+  const rnd=Math.max(1, Math.round(+document.getElementById("roundsInput").value||0));
+  if(state.players.length<4){ err.textContent="Add at least 4 players to start a padel match (4 per court)."; return; }
+  state.pointsPerMatch=pts; state.numRounds=rnd;
+  state.rounds=[buildRound()]; state.currentRound=0; state.phase="play";
+  save(); render(); window.scrollTo(0,0);
+}
+
+function onScoreInput(el){
+  const r=+el.dataset.round, c=+el.dataset.court, team=el.dataset.team;
+  const court=state.rounds[r].courts[c];
+  const raw=el.value.trim();
+  if(raw===""){ court.scoreA=null; court.scoreB=null; }
+  else{
+    let n=Math.round(+raw); if(isNaN(n))n=0;
+    n=Math.max(0, Math.min(state.pointsPerMatch, n));
+    if(team==="A"){ court.scoreA=n; court.scoreB=state.pointsPerMatch-n; }
+    else{ court.scoreB=n; court.scoreA=state.pointsPerMatch-n; }
+  }
+  save(); refreshScoreInputs(r,c); refreshLive(); refreshCourtWin(r,c);
+}
+function refreshScoreInputs(r,c){
+  const court=state.rounds[r].courts[c];
+  document.querySelectorAll('input[data-round="'+r+'"][data-court="'+c+'"]').forEach(inp=>{
+    if(inp===document.activeElement) return;
+    const v = inp.dataset.team==="A" ? court.scoreA : court.scoreB;
+    inp.value = v==null ? "" : v;
+  });
+}
+function refreshCourtWin(r,c){
+  const court=state.rounds[r].courts[c];
+  const card=document.getElementById("court-"+r+"-"+c); if(!card) return;
+  const a=card.querySelector('[data-side="A"]'), b=card.querySelector('[data-side="B"]');
+  [a,b].forEach(x=>{ if(x){ x.classList.remove("win"); const wb=x.querySelector(".winbadge"); if(wb) wb.remove(); }});
+  if(court.scoreA==null||court.scoreB==null) return;
+  if(court.scoreA>court.scoreB) markWin(a);
+  else if(court.scoreB>court.scoreA) markWin(b);
+}
+function markWin(el){ if(!el) return; el.classList.add("win"); const n=el.querySelector(".names"); if(n && !n.querySelector(".winbadge")){ const s=document.createElement("span"); s.className="winbadge"; s.textContent="WON"; n.appendChild(s);} }
+
+function scoredStatus(){
+  const r=state.rounds[state.currentRound];
+  const done=r.courts.filter(c=>c.scoreA!=null&&c.scoreB!=null).length;
+  return done+" of "+plural(r.courts.length,"match")+" scored";
+}
+function refreshLive(){
+  const live=document.getElementById("livePanel"); if(live) live.innerHTML=liveTableHTML();
+  const st=document.getElementById("scoreStatus"); if(st) st.textContent=scoredStatus();
+}
+
+function nextRound(){
+  if(state.currentRound < state.numRounds-1){
+    if(!state.rounds[state.currentRound+1]) state.rounds.push(buildRound());
+    state.currentRound++; save(); render(); window.scrollTo(0,0);
+  } else { finish(); }
+}
+function prevRound(){ if(state.currentRound>0){ state.currentRound--; save(); render(); window.scrollTo(0,0);} }
+function reshuffle(){ state.rounds[state.currentRound]=buildRound(); save(); render(); }
+function finish(){ state.phase="results"; save(); render(); window.scrollTo(0,0); }
+function backToPlay(){ state.phase="play"; save(); render(); window.scrollTo(0,0); }
+
+function addAnotherRound(){
+  state.numRounds += 1;
+  state.rounds.push(buildRound());
+  state.currentRound = state.rounds.length-1;
+  state.phase="play"; save(); render(); window.scrollTo(0,0);
+}
+function newKeepPlayers(){
+  state.rounds=[]; state.currentRound=0; state.phase="setup"; save(); render(); window.scrollTo(0,0);
+}
+function resetAll(){
+  if(!confirm("Clear everything — players, scores, the lot?")) return;
+  state=JSON.parse(JSON.stringify(DEFAULT)); save(); render(); window.scrollTo(0,0);
+}
+
+/* ---------- render ---------- */
+function render(){
+  const app=document.getElementById("app");
+  if(state.phase==="setup") app.innerHTML=setupHTML();
+  else if(state.phase==="play") app.innerHTML=playHTML();
+  else app.innerHTML=resultsHTML();
+}
+
+function setupHTML(){
+  const ptsPresets=[16,21,24,32], rndPresets=[3,5,7,9];
+  const playersHTML = state.players.length
+    ? state.players.map(p=>`<span class="ptag">${esc(p.name)}<button class="x" onclick="removePlayer('${p.id}')" aria-label="remove">×</button></span>`).join("")
+    : `<span class="muted small">No players yet — add your crew above.</span>`;
+  const courts = Math.floor(state.players.length/4);
+  const sitting = state.players.length%4;
+  let plan = state.players.length<4
+    ? `<span class="muted">Add at least 4 players (4 per court).</span>`
+    : `<b>${plural(courts,"court")}</b> per round` + (sitting? ` · <b>${sitting}</b> sit out & rotate each round`:` · everyone plays every round 🎉`);
+
+  return `
+  <div class="card">
+    <h2>1 · Players <span class="pill" style="float:right">${state.players.length}</span></h2>
+    <div class="row">
+      <input id="nameInput" type="text" placeholder="Player name…" autocomplete="off"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();addPlayer();}" />
+      <button class="btn primary" onclick="addPlayer()">Add</button>
+    </div>
+    <div class="players">${playersHTML}</div>
+    <div id="setupErr" class="err"></div>
+  </div>
+
+  <div class="card">
+    <h2>2 · Format</h2>
+    <div class="split">
+      <div>
+        <label class="fld">Points per match</label>
+        <input id="pointsInput" type="number" inputmode="numeric" min="2" value="${state.pointsPerMatch}"
+          onchange="setPoints(Math.max(2,Math.round(+this.value||0)))" />
+        <div class="chips">${ptsPresets.map(v=>`<span class="chip ${state.pointsPerMatch===v?'on':''}" onclick="setPoints(${v})">${v}</span>`).join("")}</div>
+        <div class="small muted" style="margin-top:8px">Each match plays to this total. Winner takes the bigger share.</div>
+      </div>
+      <div>
+        <label class="fld">Number of rounds</label>
+        <input id="roundsInput" type="number" inputmode="numeric" min="1" value="${state.numRounds}"
+          onchange="setRounds(Math.max(1,Math.round(+this.value||0)))" />
+        <div class="chips">${rndPresets.map(v=>`<span class="chip ${state.numRounds===v?'on':''}" onclick="setRounds(${v})">${v}</span>`).join("")}</div>
+        <div class="small muted" style="margin-top:8px">${plan}</div>
+      </div>
+    </div>
+    <hr class="hr" />
+    <label class="fld">Final ranking</label>
+    ${rankToggleHTML()}
+    <div class="small muted" style="margin-top:8px">Total points is the fairest default when partners are random. Switch to wins if you'd rather.</div>
+  </div>
+
+  <button class="btn primary block lg" onclick="startTournament()">Start tournament 🚀</button>
+  ${state.players.length? `<div class="actions"><button class="btn danger" onclick="resetAll()">Clear all</button></div>`:""}
+  `;
+}
+
+function teamRowHTML(r,c,side,ids,score){
+  const names=`${pName(ids[0])}<span class="amp">+</span>${pName(ids[1])}`;
+  return `<div class="team" data-side="${side}">
+      <div class="names">${names}</div>
+      <input class="score" type="number" inputmode="numeric" min="0" max="${state.pointsPerMatch}"
+        data-round="${r}" data-court="${c}" data-team="${side}"
+        value="${score==null?'':score}" placeholder="–" oninput="onScoreInput(this)" />
+    </div>`;
+}
+
+function courtHTML(r,ci,court){
+  return `<div class="court" id="court-${r}-${ci}">
+    <div class="ch"><span class="name">🏟️ Court ${ci+1}</span><span class="pill tag">to ${state.pointsPerMatch}</span></div>
+    ${teamRowHTML(r,ci,"A",court.teamA,court.scoreA)}
+    <div class="vs">vs</div>
+    ${teamRowHTML(r,ci,"B",court.teamB,court.scoreB)}
+  </div>`;
+}
+
+function playHTML(){
+  const ri=state.currentRound, round=state.rounds[ri];
+  const pct=Math.round(((ri+1)/state.numRounds)*100);
+  const courtsHTML=round.courts.map((c,ci)=>courtHTML(ri,ci,c)).join("");
+  const byesHTML=round.byes.length
+    ? `<div class="byes">😴 Sitting out: <b>${round.byes.map(pName).join(", ")}</b></div>` : "";
+  const isLast = ri===state.numRounds-1;
+
+  return `
+  <div class="card">
+    <div class="progress">
+      <span class="pill">Round ${ri+1} / ${state.numRounds}</span>
+      <span class="small muted" id="scoreStatus">${scoredStatus()}</span>
+    </div>
+    <div class="bar"><span style="width:${pct}%"></span></div>
+  </div>
+
+  <div class="card">
+    <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <h2 style="margin:0">Matches</h2>
+      <button class="btn ghost sm" onclick="reshuffle()">🎲 Reshuffle</button>
+    </div>
+    ${courtsHTML}
+    ${byesHTML}
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>Standings so far</summary>
+      <div id="livePanel" class="live">${liveTableHTML()}</div>
+    </details>
+  </div>
+
+  <div class="actions">
+    ${ri>0?`<button class="btn ghost" onclick="prevRound()">← Back</button>`:""}
+    <button class="btn primary" onclick="nextRound()">${isLast?"Finish 🏆":"Next round →"}</button>
+  </div>
+  <div class="actions"><button class="btn ghost sm" style="flex:0;margin:2px auto 0" onclick="finish()">Finish early & see results</button></div>
+  `;
+}
+
+function liveTableHTML(){
+  const s=computeStandings();
+  const toggle=`<div style="margin-bottom:10px">${rankToggleHTML()}</div>`;
+  if(!s.some(x=>x.played)) return toggle+`<div class="muted small" style="padding:4px 0">Enter some scores to see the table.</div>`;
+  const wA=state.rankBy==="wins"?" active":"", pA=state.rankBy!=="wins"?" active":"";
+  return toggle+`<table><thead><tr><th class="rank">#</th><th>Player</th><th class="num${wA}">W</th><th class="num${pA}">Pts</th></tr></thead><tbody>
+    ${s.map((p,i)=>`<tr><td class="rank">${i+1}</td><td>${esc(p.name)}</td><td class="num${wA}">${p.wins}</td><td class="num${pA}">${p.points}</td></tr>`).join("")}
+  </tbody></table>`;
+}
+
+function resultsHTML(){
+  const s=computeStandings();
+  const played=s.some(x=>x.played);
+  const top=s[0];
+  const winners = played ? s.filter(p=>p.wins===top.wins && p.points===top.points) : [];
+  const medals=["🥇","🥈","🥉"];
+
+  const banner = !played
+    ? `<div class="card"><div class="muted">No scores were entered, so there's no winner yet.</div></div>`
+    : `<div class="winnerbanner">
+        <div class="crown">👑</div>
+        <div class="wname">${winners.map(w=>esc(w.name)).join(" & ")}</div>
+        <div class="wstat">${winners.length>1?"Tied champions":"Champion"} · ${plural(top.wins,"win")} · ${top.points} points</div>
+      </div>`;
+
+  const wA=state.rankBy==="wins"?" active":"", pA=state.rankBy!=="wins"?" active":"";
+  const table = `<div class="card">
+    <div class="ch" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <h2 style="margin:0">Final standings</h2>
+      ${rankToggleHTML()}
+    </div>
+    <table><thead><tr><th class="rank">#</th><th>Player</th><th class="num">Played</th><th class="num${wA}">Wins</th><th class="num${pA}">Points</th></tr></thead>
+    <tbody>
+    ${s.map((p,i)=>`<tr class="${i===0&&played?'top1':''}">
+      <td class="rank">${played&&i<3?medals[i]:(i+1)}</td>
+      <td>${esc(p.name)}</td>
+      <td class="num">${p.played}</td>
+      <td class="num${wA}">${p.wins}</td>
+      <td class="num${pA}">${p.points}</td>
+    </tr>`).join("")}
+    </tbody></table>
+  </div>`;
+
+  return `
+  ${banner}
+  ${table}
+  <div class="card stack">
+    <div class="actions">
+      <button class="btn ghost" onclick="backToPlay()">← Back to rounds</button>
+      <button class="btn cyan" onclick="addAnotherRound()">➕ Add a round</button>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" onclick="newKeepPlayers()">Rematch (keep players)</button>
+      <button class="btn danger" onclick="resetAll()">Start over</button>
+    </div>
+  </div>`;
+}
+
+/* ---------- boot ---------- */
+render();
+
+/* ---------- PWA: offline + installable ---------- */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+}
+</script>
+</body>
+</html>
