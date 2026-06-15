@@ -62,6 +62,8 @@
   .ranktoggle .chip{padding:6px 12px}
   th.active{color:var(--accent)}
   td.active{color:var(--accent);font-weight:800}
+  .potbig{font-size:30px;font-weight:900;color:var(--gold);margin:2px 0 10px}
+  td.money{color:var(--gold);font-weight:800}
   .players{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
   .ptag{display:inline-flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:7px 8px 7px 14px;font-weight:700}
   .ptag .x{width:22px;height:22px;border-radius:50%;background:#2c3543;color:var(--muted);border:none;cursor:pointer;font-size:14px;line-height:1;display:grid;place-items:center}
@@ -133,7 +135,7 @@
 
 /* ---------- state ---------- */
 const KEY = "padelsluts.v1";
-const DEFAULT = { players:[], pointsPerMatch:24, numRounds:5, rounds:[], currentRound:0, phase:"setup", rankBy:"points", mode:"americano", pairing:"smart" };
+const DEFAULT = { players:[], pointsPerMatch:24, numRounds:5, rounds:[], currentRound:0, phase:"setup", rankBy:"points", mode:"americano", pairing:"smart", buyIn:0, currency:"£", payout:"all" };
 let state = load();
 
 function load(){
@@ -286,6 +288,43 @@ function rankToggleHTML(){
     `<span class="chip ${!byPts?'on':''}" onclick="setRankBy('wins')">Wins</span></span>`;
 }
 
+/* ---------- the pot 💸 ---------- */
+function setBuyIn(v){ state.buyIn=Math.max(0, +v||0); save(); render(); }
+function setCurrency(c){ state.currency=c; save(); render(); }
+function setPayout(p){ state.payout=p; save(); render(); }
+function formatMoney(n){ n=Math.round(n*100)/100; return state.currency + (Number.isInteger(n)? n : n.toFixed(2)); }
+function potPayouts(standings){
+  const pot=state.buyIn*state.players.length;
+  const elig=standings.filter(p=>p.played>0);
+  if(!elig.length) return { pot, payouts:[] };
+  const schemes={ all:[100], top2:[60,40], top3:[50,30,20] };
+  const base=schemes[state.payout]||[100];
+  let pct=base.slice(0, Math.min(base.length, elig.length));
+  const sum=pct.reduce((a,b)=>a+b,0);
+  pct=pct.map(x=> x/sum*100);                 // normalise so the whole pot pays out
+  const posPct=elig.map((_,i)=> pct[i]||0);
+  const payouts=[]; let i=0;
+  while(i<elig.length){                        // split prize evenly across any exact ties
+    let j=i;
+    while(j+1<elig.length && elig[j+1].wins===elig[i].wins && elig[j+1].points===elig[i].points) j++;
+    const groupPct=posPct.slice(i,j+1).reduce((a,b)=>a+b,0)/(j-i+1);
+    for(let k=i;k<=j;k++){ if(groupPct>0.0001) payouts.push({ id:elig[k].id, name:elig[k].name, amount: pot*groupPct/100 }); }
+    i=j+1;
+  }
+  return { pot, payouts };
+}
+function potCardHTML(standings, played){
+  const { pot, payouts }=potPayouts(standings);
+  const rows=(played && payouts.length)
+    ? payouts.map(p=>`<tr><td>${esc(p.name)}</td><td class="num money">${formatMoney(p.amount)}</td></tr>`).join("")
+    : `<tr><td class="muted small">Finish the tournament to see who scoops it.</td><td></td></tr>`;
+  return `<div class="card">
+    <h2>💸 The pot</h2>
+    <div class="potbig">${formatMoney(pot)} <span class="small muted" style="font-weight:600">in the pot</span></div>
+    <table><tbody>${rows}</tbody></table>
+  </div>`;
+}
+
 function startTournament(){
   const err=document.getElementById("setupErr");
   const pts=Math.max(2, Math.round(+document.getElementById("pointsInput").value||0));
@@ -436,6 +475,19 @@ function setupHTML(){
     <label class="fld">Final ranking</label>
     ${rankToggleHTML()}
     <div class="small muted" style="margin-top:8px">Total points is the fairest default when partners are random. Switch to wins if you'd rather.</div>
+    <hr class="hr" />
+    <label class="fld">Pot 💸 — optional</label>
+    <div class="row">
+      <input id="buyInInput" type="number" inputmode="decimal" min="0" placeholder="Buy-in per player" value="${state.buyIn||''}" onchange="setBuyIn(this.value)" />
+      <div class="chips">${['£','$','€'].map(c=>`<span class="chip ${state.currency===c?'on':''}" onclick="setCurrency('${c}')">${c}</span>`).join('')}</div>
+    </div>
+    ${state.buyIn>0 ? `<div class="chips" style="margin-top:10px">
+      <span class="chip ${state.payout==='all'?'on':''}" onclick="setPayout('all')">Winner takes all</span>
+      <span class="chip ${state.payout==='top2'?'on':''}" onclick="setPayout('top2')">Top 2 split</span>
+      <span class="chip ${state.payout==='top3'?'on':''}" onclick="setPayout('top3')">Top 3 split</span>
+    </div>
+    <div class="small muted" style="margin-top:8px">💰 Total pot: <b>${formatMoney(state.buyIn*state.players.length)}</b> — ${state.players.length} × ${formatMoney(state.buyIn)} each.</div>`
+    : `<div class="small muted" style="margin-top:8px">Add a buy-in to track the prize pot and who takes it home.</div>`}
   </div>
 
   <button class="btn primary block lg" onclick="startTournament()">Start tournament 🚀</button>
@@ -546,9 +598,12 @@ function resultsHTML(){
     </tbody></table>
   </div>`;
 
+  const potHTML = state.buyIn>0 ? potCardHTML(s, played) : "";
+
   return `
   ${banner}
   ${table}
+  ${potHTML}
   <div class="card stack">
     <div class="actions">
       <button class="btn ghost" onclick="backToPlay()">← Back to rounds</button>
