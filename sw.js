@@ -1,5 +1,5 @@
-/* Padelsluts service worker — offline app shell */
-const CACHE = "padelsluts-v1";
+/* Padelsluts service worker — offline app shell (network-first so updates land immediately) */
+const CACHE = "padelsluts-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -23,15 +23,14 @@ self.addEventListener("activate", (e) => {
   );
 });
 
+// Network-first: always try the live version, fall back to cache only when offline.
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   e.respondWith(
-    caches.match(e.request).then((hit) =>
-      hit || fetch(e.request).then((resp) => {
-        const copy = resp.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
-        return resp;
-      }).catch(() => caches.match("./index.html"))
-    )
+    fetch(e.request).then((resp) => {
+      const copy = resp.clone();
+      caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
+      return resp;
+    }).catch(() => caches.match(e.request).then((hit) => hit || caches.match("./index.html")))
   );
 });

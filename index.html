@@ -133,7 +133,7 @@
 
 /* ---------- state ---------- */
 const KEY = "padelsluts.v1";
-const DEFAULT = { players:[], pointsPerMatch:24, numRounds:5, rounds:[], currentRound:0, phase:"setup", rankBy:"points" };
+const DEFAULT = { players:[], pointsPerMatch:24, numRounds:5, rounds:[], currentRound:0, phase:"setup", rankBy:"points", mode:"americano", pairing:"smart" };
 let state = load();
 
 function load(){
@@ -152,22 +152,99 @@ function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.flo
 function pName(id){ const p=state.players.find(x=>x.id===id); return p?esc(p.name):"?"; }
 function plural(n,w){ return n+" "+w+(n===1?"":"s"); }
 
-/* ---------- round generation (random + fair byes) ---------- */
-function buildRound(){
-  const ids = state.players.map(p=>p.id);
-  const byeCount = {}; ids.forEach(id=>byeCount[id]=0);
-  state.rounds.forEach(r => r.byes.forEach(id => { if(byeCount[id]!=null) byeCount[id]++; }));
-  const n = ids.length;
-  const byesNeeded = n % 4;
-  // fewest byes so far go first to play; ties broken randomly (shuffle then stable sort)
-  const ordered = shuffle(ids).sort((a,b)=> byeCount[a]-byeCount[b]);
-  const byes = ordered.slice(0, byesNeeded);
-  const playing = shuffle(ordered.slice(byesNeeded));
-  const courts = [];
-  for(let i=0;i<playing.length;i+=4){
-    courts.push({ teamA:[playing[i],playing[i+1]], teamB:[playing[i+2],playing[i+3]], scoreA:null, scoreB:null });
+/* ---------- round generation: Americano (smart/random) + Mexicano ---------- */
+function pairKey(a,b){ return a<b ? a+"|"+b : b+"|"+a; }
+
+// fair byes: players who've sat out least go first to play; ties random
+function pickByes(ids){
+  const byeCount={}; ids.forEach(id=>byeCount[id]=0);
+  state.rounds.forEach(r=> r.byes.forEach(id=>{ if(byeCount[id]!=null) byeCount[id]++; }));
+  const ordered=shuffle(ids).sort((a,b)=> byeCount[a]-byeCount[b]);
+  return ordered.slice(0, ids.length%4);
+}
+function chunkTeams(arr){
+  const courts=[];
+  for(let i=0;i<arr.length;i+=4) courts.push({ teamA:[arr[i],arr[i+1]], teamB:[arr[i+2],arr[i+3]], scoreA:null, scoreB:null });
+  return courts;
+}
+// how often each pair has partnered / faced off so far
+function historyCounts(){
+  const partner={}, opp={};
+  const bump=(m,a,b)=>{ const k=pairKey(a,b); m[k]=(m[k]||0)+1; };
+  state.rounds.forEach(r=> r.courts.forEach(c=>{
+    bump(partner,c.teamA[0],c.teamA[1]); bump(partner,c.teamB[0],c.teamB[1]);
+    c.teamA.forEach(a=> c.teamB.forEach(b=> bump(opp,a,b)));
+  }));
+  return { partner, opp };
+}
+// lower = fewer repeats; repeat partners punished 10x harder than repeat opponents
+function arrangementCost(courts,partner,opp){
+  let cost=0;
+  courts.forEach(c=>{
+    cost += (partner[pairKey(c.teamA[0],c.teamA[1])]||0)*10;
+    cost += (partner[pairKey(c.teamB[0],c.teamB[1])]||0)*10;
+    c.teamA.forEach(a=> c.teamB.forEach(b=>{ cost += (opp[pairKey(a,b)]||0); }));
+  });
+  return cost;
+}
+// one greedy draw: pair least-used partners, then pit teams with least-faced opponents
+function greedyArrange(playing, partner, opp){
+  const pool=shuffle(playing);
+  const teams=[];
+  while(pool.length){
+    const a=pool.shift();
+    let bi=0, bc=Infinity;
+    for(let i=0;i<pool.length;i++){ const c=partner[pairKey(a,pool[i])]||0; if(c<bc){ bc=c; bi=i; if(c===0) break; } }
+    teams.push([a, pool.splice(bi,1)[0]]);
+  }
+  const tpool=shuffle(teams), courts=[];
+  while(tpool.length){
+    const tA=tpool.shift();
+    let bi=0, bc=Infinity;
+    for(let i=0;i<tpool.length;i++){
+      let c=0; const tB=tpool[i];
+      tA.forEach(x=> tB.forEach(y=>{ c+=(opp[pairKey(x,y)]||0); }));
+      if(c<bc){ bc=c; bi=i; if(c===0) break; }
+    }
+    courts.push({ teamA:tA, teamB:tpool.splice(bi,1)[0], scoreA:null, scoreB:null });
+  }
+  return courts;
+}
+function buildAmericanoRound(){
+  const ids=state.players.map(p=>p.id);
+  const byes=pickByes(ids);
+  const playing=ids.filter(id=> byes.indexOf(id)<0);
+  if(state.pairing==="random" || playing.length<=4) return { courts:chunkTeams(shuffle(playing)), byes };
+  // smart: run many greedy draws, keep the one with fewest repeat partners/opponents
+  const { partner, opp }=historyCounts();
+  let best=null, bestCost=Infinity;
+  const attempts=Math.min(400, Math.max(120, playing.length*12));
+  for(let t=0;t<attempts;t++){
+    const courts=greedyArrange(playing, partner, opp);
+    const cost=arrangementCost(courts,partner,opp);
+    if(cost<bestCost){ bestCost=cost; best=courts; if(cost===0) break; }
+  }
+  return { courts:best, byes };
+}
+function buildMexicanoRound(){
+  const ids=state.players.map(p=>p.id);
+  const byes=pickByes(ids);
+  const playing=new Set(ids.filter(id=> byes.indexOf(id)<0));
+  // rank the playing field by points, then group: 1st+4th vs 2nd+3rd on each court
+  const ranked=computeStandings().slice()
+    .sort((a,b)=> b.points-a.points || b.wins-a.wins || a.name.localeCompare(b.name))
+    .map(p=>p.id).filter(id=> playing.has(id));
+  const courts=[];
+  for(let i=0;i<ranked.length;i+=4){
+    const g=ranked.slice(i,i+4);
+    courts.push({ teamA:[g[0],g[3]], teamB:[g[1],g[2]], scoreA:null, scoreB:null });
   }
   return { courts, byes };
+}
+function buildRound(){
+  const played = state.rounds.some(r=> r.courts.some(c=> c.scoreA!=null && c.scoreB!=null));
+  if(state.mode==="mexicano" && played) return buildMexicanoRound();
+  return buildAmericanoRound();
 }
 
 /* ---------- standings ---------- */
@@ -199,6 +276,8 @@ function addPlayer(){
 function removePlayer(id){ state.players=state.players.filter(p=>p.id!==id); save(); render(); }
 function setPoints(v){ state.pointsPerMatch=v; save(); render(); }
 function setRounds(v){ state.numRounds=v; save(); render(); }
+function setMode(m){ state.mode=m; save(); render(); }
+function setPairing(p){ state.pairing=p; save(); render(); }
 function setRankBy(v){ state.rankBy=v; save(); if(state.phase==="play") refreshLive(); else render(); }
 function rankToggleHTML(){
   const byPts=state.rankBy!=="wins";
@@ -213,7 +292,7 @@ function startTournament(){
   const rnd=Math.max(1, Math.round(+document.getElementById("roundsInput").value||0));
   if(state.players.length<4){ err.textContent="Add at least 4 players to start a padel match (4 per court)."; return; }
   state.pointsPerMatch=pts; state.numRounds=rnd;
-  state.rounds=[buildRound()]; state.currentRound=0; state.phase="play";
+  state.rounds=[]; state.rounds.push(buildRound()); state.currentRound=0; state.phase="play";
   save(); render(); window.scrollTo(0,0);
 }
 
@@ -266,7 +345,12 @@ function nextRound(){
   } else { finish(); }
 }
 function prevRound(){ if(state.currentRound>0){ state.currentRound--; save(); render(); window.scrollTo(0,0);} }
-function reshuffle(){ state.rounds[state.currentRound]=buildRound(); save(); render(); }
+function reshuffle(){
+  const ri=state.currentRound;
+  state.rounds.splice(ri,1);              // drop current so it doesn't count as its own history
+  state.rounds.splice(ri,0,buildRound());
+  save(); render();
+}
 function finish(){ state.phase="results"; save(); render(); window.scrollTo(0,0); }
 function backToPlay(){ state.phase="play"; save(); render(); window.scrollTo(0,0); }
 
@@ -317,6 +401,14 @@ function setupHTML(){
 
   <div class="card">
     <h2>2 · Format</h2>
+    <label class="fld">Tournament type</label>
+    <div class="chips" style="margin-bottom:6px">
+      <span class="chip ${state.mode!=='mexicano'?'on':''}" onclick="setMode('americano')">🎾 Americano</span>
+      <span class="chip ${state.mode==='mexicano'?'on':''}" onclick="setMode('mexicano')">🇲🇽 Mexicano</span>
+    </div>
+    <div class="small muted" style="margin-bottom:14px">${state.mode==='mexicano'
+      ? '<b>Mexicano</b> — partners &amp; opponents are set by the live leaderboard each round (winners play winners). Stays competitive right to the end.'
+      : '<b>Americano</b> — random partners every round, so everyone plays with and against everyone.'}</div>
     <div class="split">
       <div>
         <label class="fld">Points per match</label>
@@ -333,6 +425,13 @@ function setupHTML(){
         <div class="small muted" style="margin-top:8px">${plan}</div>
       </div>
     </div>
+    ${state.mode!=='mexicano' ? `<hr class="hr" />
+    <label class="fld">Pairing</label>
+    <div class="chips">
+      <span class="chip ${state.pairing!=='random'?'on':''}" onclick="setPairing('smart')">Smart</span>
+      <span class="chip ${state.pairing==='random'?'on':''}" onclick="setPairing('random')">Random</span>
+    </div>
+    <div class="small muted" style="margin-top:8px">${state.pairing==='random' ? 'Pure luck of the draw each round.' : 'Avoids repeat partners for as long as possible, so the mix stays fresh.'}</div>` : ''}
     <hr class="hr" />
     <label class="fld">Final ranking</label>
     ${rankToggleHTML()}
@@ -374,7 +473,7 @@ function playHTML(){
   return `
   <div class="card">
     <div class="progress">
-      <span class="pill">Round ${ri+1} / ${state.numRounds}</span>
+      <span><span class="pill">Round ${ri+1} / ${state.numRounds}</span> <span class="pill">${state.mode==='mexicano'?'🇲🇽 Mexicano':'🎾 Americano'}</span></span>
       <span class="small muted" id="scoreStatus">${scoredStatus()}</span>
     </div>
     <div class="bar"><span style="width:${pct}%"></span></div>
@@ -383,7 +482,7 @@ function playHTML(){
   <div class="card">
     <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
       <h2 style="margin:0">Matches</h2>
-      <button class="btn ghost sm" onclick="reshuffle()">🎲 Reshuffle</button>
+      ${state.mode==='mexicano' ? `<span class="pill" style="align-self:center">Set by leaderboard</span>` : `<button class="btn ghost sm" onclick="reshuffle()">🎲 Reshuffle</button>`}
     </div>
     ${courtsHTML}
     ${byesHTML}
