@@ -64,6 +64,10 @@
   td.active{color:var(--accent);font-weight:800}
   .potbig{font-size:30px;font-weight:900;color:var(--gold);margin:2px 0 10px}
   td.money{color:var(--gold);font-weight:800}
+  .histitem{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line)}
+  .histitem:last-of-type{border-bottom:0}
+  .hi-win{font-weight:700;font-size:15px;margin-bottom:3px}
+  .hi-actions{display:flex;gap:8px;flex-shrink:0}
   .players{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
   .ptag{display:inline-flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:7px 8px 7px 14px;font-weight:700}
   .ptag .x{width:22px;height:22px;border-radius:50%;background:#2c3543;color:var(--muted);border:none;cursor:pointer;font-size:14px;line-height:1;display:grid;place-items:center}
@@ -137,6 +141,8 @@
 const KEY = "padelsluts.v1";
 const DEFAULT = { players:[], pointsPerMatch:24, numRounds:5, rounds:[], currentRound:0, phase:"setup", rankBy:"points", mode:"americano", pairing:"smart", buyIn:0, currency:"£", payout:"all" };
 let state = load();
+let history = loadHistory();
+let view = null;
 
 function load(){
   try{
@@ -325,13 +331,91 @@ function potCardHTML(standings, played){
   </div>`;
 }
 
+/* ---------- saved games (local history; syncs to the cloud once login lands) ---------- */
+const HKEY="padelsluts.history.v1";
+function loadHistory(){ try{ const h=JSON.parse(localStorage.getItem(HKEY)); return Array.isArray(h)?h:[]; }catch(e){ return []; } }
+function saveHistory(){ try{ localStorage.setItem(HKEY, JSON.stringify(history)); }catch(e){} }
+function currentSummary(){
+  const s=computeStandings();
+  const top=s.some(x=>x.played)?s[0]:null;
+  return {
+    savedAt: Date.now(),
+    players: state.players.length,
+    mode: state.mode==="mexicano"?"Mexicano":"Americano",
+    finished: state.phase==="results",
+    winnerName: top?top.name:null,
+    winnerStat: top?(top.wins+" wins · "+top.points+" pts"):null,
+    pot: state.buyIn>0 ? formatMoney(state.buyIn*state.players.length) : null
+  };
+}
+function archiveCurrent(){
+  if(!state.players || !state.players.length) return;
+  const hasScores=(state.rounds||[]).some(r=>r.courts.some(c=>c.scoreA!=null));
+  if(!hasScores) return;                       // only save games that actually got played
+  if(!state.id) state.id=uid();
+  const entry={ id:state.id, savedAt:Date.now(), summary:currentSummary(), snapshot:JSON.parse(JSON.stringify(state)) };
+  const i=history.findIndex(h=>h.id===state.id);
+  if(i>=0) history[i]=entry; else history.unshift(entry);   // upsert by game id (one entry per game)
+  saveHistory();
+}
+function newGame(keepPlayers){
+  const inProgress = state.phase==="play" && (state.rounds||[]).some(r=>r.courts.some(c=>c.scoreA!=null));
+  if(inProgress && !confirm("Start a new game? This one is saved to your history first.")) return;
+  archiveCurrent();
+  const fresh=JSON.parse(JSON.stringify(DEFAULT));
+  fresh.players = keepPlayers ? state.players.map(p=>({id:p.id,name:p.name})) : [];
+  fresh.pointsPerMatch=state.pointsPerMatch; fresh.numRounds=state.numRounds;
+  fresh.mode=state.mode; fresh.pairing=state.pairing; fresh.rankBy=state.rankBy;
+  fresh.currency=state.currency; fresh.payout=state.payout; fresh.buyIn=state.buyIn;
+  state=fresh; view=null; save(); render(); window.scrollTo(0,0);
+}
+function openFromHistory(id){
+  archiveCurrent();
+  const e=history.find(h=>h.id===id); if(!e) return;
+  state=JSON.parse(JSON.stringify(e.snapshot)); if(!state.id) state.id=e.id;
+  view=null; save(); render(); window.scrollTo(0,0);
+}
+function deleteHistoryItem(id){ history=history.filter(h=>h.id!==id); saveHistory(); render(); }
+function clearHistory(){ if(!confirm("Delete all saved games? This can't be undone.")) return; history=[]; saveHistory(); render(); }
+function showHistory(){ view="history"; render(); window.scrollTo(0,0); }
+function hideHistory(){ view=null; render(); window.scrollTo(0,0); }
+function historyHTML(){
+  const items=history.slice().sort((a,b)=>b.savedAt-a.savedAt);
+  const list = items.length ? items.map(e=>{
+    const s=e.summary||{}; const d=new Date(e.savedAt);
+    const date=d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+' · '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+    const win = s.winnerName ? `👑 ${esc(s.winnerName)} <span class="muted" style="font-weight:600">${s.winnerStat||''}</span>` : `<span class="muted">no scores yet</span>`;
+    const tags = `${s.players||0} players · ${s.mode||'Americano'}${s.finished?'':' · in progress'}${s.pot?` · 💸 ${s.pot}`:''}`;
+    return `<div class="histitem">
+      <div class="hi-main">
+        <div class="hi-win">${win}</div>
+        <div class="small muted">${tags}</div>
+        <div class="small muted">${date}</div>
+      </div>
+      <div class="hi-actions">
+        <button class="btn ghost sm" onclick="openFromHistory('${e.id}')">Open</button>
+        <button class="btn danger sm" onclick="deleteHistoryItem('${e.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join("") : `<div class="muted" style="padding:10px 0">No saved games yet. Finish a tournament and it lands here automatically.</div>`;
+  return `<div class="card">
+    <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h2 style="margin:0">📋 Saved games</h2>
+      <button class="btn ghost sm" onclick="hideHistory()">← Back</button>
+    </div>
+    ${list}
+    ${items.length?`<hr class="hr" /><button class="btn danger sm" onclick="clearHistory()">Clear all saved games</button>`:''}
+  </div>`;
+}
+
 function startTournament(){
   const err=document.getElementById("setupErr");
   const pts=Math.max(2, Math.round(+document.getElementById("pointsInput").value||0));
   const rnd=Math.max(1, Math.round(+document.getElementById("roundsInput").value||0));
   if(state.players.length<4){ err.textContent="Add at least 4 players to start a padel match (4 per court)."; return; }
+  archiveCurrent();
   state.pointsPerMatch=pts; state.numRounds=rnd;
-  state.rounds=[]; state.rounds.push(buildRound()); state.currentRound=0; state.phase="play";
+  state.id=uid(); state.rounds=[]; state.rounds.push(buildRound()); state.currentRound=0; state.phase="play";
   save(); render(); window.scrollTo(0,0);
 }
 
@@ -390,7 +474,7 @@ function reshuffle(){
   state.rounds.splice(ri,0,buildRound());
   save(); render();
 }
-function finish(){ state.phase="results"; save(); render(); window.scrollTo(0,0); }
+function finish(){ state.phase="results"; archiveCurrent(); save(); render(); window.scrollTo(0,0); }
 function backToPlay(){ state.phase="play"; save(); render(); window.scrollTo(0,0); }
 
 function addAnotherRound(){
@@ -410,6 +494,7 @@ function resetAll(){
 /* ---------- render ---------- */
 function render(){
   const app=document.getElementById("app");
+  if(view==="history"){ app.innerHTML=historyHTML(); return; }
   if(state.phase==="setup") app.innerHTML=setupHTML();
   else if(state.phase==="play") app.innerHTML=playHTML();
   else app.innerHTML=resultsHTML();
@@ -491,6 +576,7 @@ function setupHTML(){
   </div>
 
   <button class="btn primary block lg" onclick="startTournament()">Start tournament 🚀</button>
+  ${history.length? `<button class="btn ghost block" style="margin-top:10px" onclick="showHistory()">📋 Saved games (${history.length})</button>`:""}
   ${state.players.length? `<div class="actions"><button class="btn danger" onclick="resetAll()">Clear all</button></div>`:""}
   `;
 }
@@ -551,7 +637,11 @@ function playHTML(){
     ${ri>0?`<button class="btn ghost" onclick="prevRound()">← Back</button>`:""}
     <button class="btn primary" onclick="nextRound()">${isLast?"Finish 🏆":"Next round →"}</button>
   </div>
-  <div class="actions"><button class="btn ghost sm" style="flex:0;margin:2px auto 0" onclick="finish()">Finish early & see results</button></div>
+  <div class="actions" style="justify-content:center;gap:18px;flex-wrap:wrap">
+    <button class="btn ghost sm" style="flex:0" onclick="finish()">Finish early</button>
+    <button class="btn ghost sm" style="flex:0" onclick="newGame(false)">🆕 New game</button>
+    ${history.length?`<button class="btn ghost sm" style="flex:0" onclick="showHistory()">📋 Saved (${history.length})</button>`:""}
+  </div>
   `;
 }
 
@@ -610,9 +700,10 @@ function resultsHTML(){
       <button class="btn cyan" onclick="addAnotherRound()">➕ Add a round</button>
     </div>
     <div class="actions">
-      <button class="btn ghost" onclick="newKeepPlayers()">Rematch (keep players)</button>
-      <button class="btn danger" onclick="resetAll()">Start over</button>
+      <button class="btn primary" onclick="newGame(false)">🆕 New game</button>
+      <button class="btn ghost" onclick="newGame(true)">Rematch — same players</button>
     </div>
+    <button class="btn ghost block" onclick="showHistory()">📋 Saved games (${history.length})</button>
   </div>`;
 }
 
