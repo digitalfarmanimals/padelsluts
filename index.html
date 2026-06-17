@@ -155,7 +155,7 @@
       </div>
     </header>
     <div id="app"></div>
-    <div class="footer">Auto-saved on this device · works offline 🟢</div>
+    <div class="footer">Auto-saved on this device · works offline 🟢 · <span id="ver"></span></div>
   </div>
   <div id="printArea" aria-hidden="true"></div>
 
@@ -963,11 +963,17 @@ function resultsHTML(){
 }
 
 /* ---------- boot ---------- */
+const APP_VERSION = "1.0";
 render();
+(function(){ var v=document.getElementById("ver"); if(v) v.textContent="v"+APP_VERSION; })();
 
-/* ---------- PWA: offline + installable ---------- */
+/* ---------- PWA: offline + installable + auto-update ---------- */
 if("serviceWorker" in navigator){
-  window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
+  var swRefreshing=false;
+  navigator.serviceWorker.addEventListener("controllerchange", function(){ if(swRefreshing) return; swRefreshing=true; window.location.reload(); });
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").then(function(reg){ if(reg) reg.update(); }).catch(function(){});
+  });
 }
 </script>
 </body>

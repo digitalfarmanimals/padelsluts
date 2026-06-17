@@ -1,5 +1,5 @@
 /* Padelsluts service worker — offline app shell (network-first so updates land immediately) */
-const CACHE = "padelsluts-v2";
+const CACHE = "padelsluts-v3";
 const ASSETS = [
   "./",
   "./index.html",
