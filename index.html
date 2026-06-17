@@ -39,7 +39,7 @@
   .row{display:flex;gap:10px;align-items:center}
   label.fld{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.6px}
   input,button,select{font-family:inherit;font-size:16px}
-  input[type=text],input[type=number]{
+  input[type=text],input[type=number],input[type=email]{
     width:100%;background:var(--card2);border:1px solid var(--line);color:var(--txt);
     border-radius:12px;padding:13px 14px;outline:none;transition:border-color .15s,box-shadow .15s;
   }
@@ -68,6 +68,7 @@
   .histitem:last-of-type{border-bottom:0}
   .hi-win{font-weight:700;font-size:15px;margin-bottom:3px}
   .hi-actions{display:flex;gap:8px;flex-shrink:0}
+  .welcome .card{max-width:460px;margin:8px auto 0}
   .players{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
   .ptag{display:inline-flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:7px 8px 7px 14px;font-weight:700}
   .ptag .x{width:22px;height:22px;border-radius:50%;background:#2c3543;color:var(--muted);border:none;cursor:pointer;font-size:14px;line-height:1;display:grid;place-items:center}
@@ -143,6 +144,11 @@ const DEFAULT = { players:[], pointsPerMatch:24, numRounds:5, rounds:[], current
 let state = load();
 let history = loadHistory();
 let view = null;
+let entered = false;
+const EKEY = "padelsluts.email.v1";
+function loadEmail(){ try{ return localStorage.getItem(EKEY)||""; }catch(e){ return ""; } }
+let userEmail = loadEmail();
+function setEmail(v){ userEmail=(v||"").trim(); try{ localStorage.setItem(EKEY, userEmail); }catch(e){} }
 
 function load(){
   try{
@@ -158,7 +164,7 @@ function esc(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;
 function uid(){ return Math.random().toString(36).slice(2,9); }
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
 function pName(id){ const p=state.players.find(x=>x.id===id); return p?esc(p.name):"?"; }
-function plural(n,w){ return n+" "+w+(n===1?"":"s"); }
+function plural(n,w){ const suf=(n===1)?"":(/(s|x|z|ch|sh)$/.test(w)?"es":"s"); return n+" "+w+suf; }
 
 /* ---------- round generation: Americano (smart/random) + Mexicano ---------- */
 function pairKey(a,b){ return a<b ? a+"|"+b : b+"|"+a; }
@@ -373,12 +379,37 @@ function openFromHistory(id){
   archiveCurrent();
   const e=history.find(h=>h.id===id); if(!e) return;
   state=JSON.parse(JSON.stringify(e.snapshot)); if(!state.id) state.id=e.id;
-  view=null; save(); render(); window.scrollTo(0,0);
+  view=null; entered=true; save(); render(); window.scrollTo(0,0);
 }
 function deleteHistoryItem(id){ history=history.filter(h=>h.id!==id); saveHistory(); render(); }
 function clearHistory(){ if(!confirm("Delete all saved games? This can't be undone.")) return; history=[]; saveHistory(); render(); }
 function showHistory(){ view="history"; render(); window.scrollTo(0,0); }
 function hideHistory(){ view=null; render(); window.scrollTo(0,0); }
+
+/* ---------- welcome / front door ---------- */
+function startNewGame(){ entered=true; newGame(false); }
+function resumeGame(){ entered=true; view=null; render(); window.scrollTo(0,0); }
+function welcomeHTML(){
+  const scored=(state.rounds||[]).some(r=>r.courts.some(c=>c.scoreA!=null));
+  let resumeLabel="";
+  if(state.phase==="play") resumeLabel = scored ? `↩︎ Resume — round ${state.currentRound+1} of ${state.numRounds}` : `↩︎ Resume current game`;
+  else if(state.phase==="results") resumeLabel=`↩︎ Last game's results`;
+  else if(state.phase==="setup" && state.players.length) resumeLabel=`↩︎ Back to setup (${state.players.length} players)`;
+  const greet = userEmail ? "Welcome back 👋" : "Welcome 👋";
+  return `
+  <div class="welcome">
+    <div class="card">
+      <h2 style="margin:0 0 4px">${greet}</h2>
+      <p class="small muted" style="margin:0 0 16px">Spin up an Americano or Mexicano tournament in seconds.</p>
+      <label class="fld">Your email</label>
+      <input id="emailInput" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" value="${esc(userEmail)}" onchange="setEmail(this.value)" />
+      <button class="btn primary block lg" style="margin-top:14px" onclick="startNewGame()">Start new game 🎾</button>
+      ${resumeLabel?`<button class="btn ghost block" style="margin-top:10px" onclick="resumeGame()">${resumeLabel}</button>`:""}
+      ${history.length?`<button class="btn ghost block" style="margin-top:10px" onclick="showHistory()">📋 Saved games (${history.length})</button>`:""}
+      <div class="small muted" style="margin-top:16px">📧 Email sign-in (to sync your games across all your devices) switches on soon — for now games save on this device.</div>
+    </div>
+  </div>`;
+}
 function historyHTML(){
   const items=history.slice().sort((a,b)=>b.savedAt-a.savedAt);
   const list = items.length ? items.map(e=>{
@@ -495,6 +526,7 @@ function resetAll(){
 function render(){
   const app=document.getElementById("app");
   if(view==="history"){ app.innerHTML=historyHTML(); return; }
+  if(!entered){ app.innerHTML=welcomeHTML(); return; }
   if(state.phase==="setup") app.innerHTML=setupHTML();
   else if(state.phase==="play") app.innerHTML=playHTML();
   else app.innerHTML=resultsHTML();
