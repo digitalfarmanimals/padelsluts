@@ -7,14 +7,14 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="KOURT" />
+<meta name="apple-mobile-web-app-title" content="Kourt" />
 <meta name="description" content="Americano padel tournaments — random partners every round, one winner." />
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="apple-touch-icon" href="apple-touch-icon-180.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
-<title>KOURT</title>
+<title>Kourt Padel</title>
 <style>
   :root{
     --bg:#0e1116; --card:#181d26; --card2:#1f2632; --line:#2a3340;
@@ -38,6 +38,9 @@
   .title{font-family:var(--display);font-weight:400;letter-spacing:1px;font-size:40px;line-height:.85;text-transform:uppercase;transform:skewX(-8deg)}
   .title b{color:var(--accent);font-weight:400}
   .tag{color:var(--muted);font-size:10.5px;margin-top:6px;text-transform:uppercase;letter-spacing:2px;font-weight:800}
+  .subtitle{font-family:var(--display);font-weight:400;font-size:15px;letter-spacing:7px;text-transform:uppercase;color:var(--accent);margin-top:2px;line-height:1;transform:skewX(-8deg)}
+  .potHead{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+  .potTog{color:var(--muted);font-size:13px;font-weight:800;display:flex;align-items:center;gap:8px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:14px 0;box-shadow:var(--shadow)}
   .card h2{margin:0 0 12px;font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:.6px;text-transform:uppercase}
   .row{display:flex;gap:10px;align-items:center}
@@ -132,6 +135,7 @@
       <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="KOURT"><circle cx="50" cy="50" r="49" fill="#c8ff32"/><text x="50" y="51" text-anchor="middle" dominant-baseline="central" font-family="'Arial Black',Arial,sans-serif" font-weight="900" font-size="66" fill="#0b0e13">K</text></svg>
       <div>
         <div class="title"><b>K</b>OURT</div>
+        <div class="subtitle">Padel</div>
         <div class="tag">Americano &amp; Mexicano · partners shuffled · one winner</div>
       </div>
     </header>
@@ -149,6 +153,8 @@ let state = load();
 let history = loadHistory();
 let view = null;
 let entered = false;
+let potOpen = false;
+function togglePot(){ potOpen=!potOpen; render(); }
 const EKEY = "padelsluts.email.v1";
 function loadEmail(){ try{ return localStorage.getItem(EKEY)||""; }catch(e){ return ""; } }
 let userEmail = loadEmail();
@@ -597,18 +603,24 @@ function setupHTML(){
     ${rankToggleHTML()}
     <div class="small muted" style="margin-top:8px">Total points is the fairest default when partners are random. Switch to wins if you'd rather.</div>
     <hr class="hr" />
-    <label class="fld">Pot 💸 — optional</label>
-    <div class="row">
-      <input id="buyInInput" type="number" inputmode="decimal" min="0" placeholder="Buy-in per player" value="${state.buyIn||''}" onchange="setBuyIn(this.value)" />
-      <div class="chips">${['£','$','€'].map(c=>`<span class="chip ${state.currency===c?'on':''}" onclick="setCurrency('${c}')">${c}</span>`).join('')}</div>
+    <div class="potHead" onclick="togglePot()">
+      <label class="fld" style="margin:0;cursor:pointer">Pot 💸 — optional</label>
+      <span class="potTog">${(!potOpen && state.buyIn>0)?`<span class="pill">${formatMoney(state.buyIn)} buy-in</span>`:''}${potOpen?'▾':'▸'}</span>
     </div>
-    ${state.buyIn>0 ? `<div class="chips" style="margin-top:10px">
-      <span class="chip ${state.payout==='all'?'on':''}" onclick="setPayout('all')">Winner takes all</span>
-      <span class="chip ${state.payout==='top2'?'on':''}" onclick="setPayout('top2')">Top 2 split</span>
-      <span class="chip ${state.payout==='top3'?'on':''}" onclick="setPayout('top3')">Top 3 split</span>
-    </div>
-    <div class="small muted" style="margin-top:8px">💰 Total pot: <b>${formatMoney(state.buyIn*state.players.length)}</b> — ${state.players.length} × ${formatMoney(state.buyIn)} each.</div>`
-    : `<div class="small muted" style="margin-top:8px">Add a buy-in to track the prize pot and who takes it home.</div>`}
+    ${potOpen?`
+    <div style="margin-top:12px">
+      <div class="row">
+        <input id="buyInInput" type="number" inputmode="decimal" min="0" placeholder="Buy-in per player" value="${state.buyIn||''}" onchange="setBuyIn(this.value)" />
+        <div class="chips">${['£','$','€'].map(c=>`<span class="chip ${state.currency===c?'on':''}" onclick="setCurrency('${c}')">${c}</span>`).join('')}</div>
+      </div>
+      ${state.buyIn>0?`<div class="chips" style="margin-top:10px">
+        <span class="chip ${state.payout==='all'?'on':''}" onclick="setPayout('all')">Winner takes all</span>
+        <span class="chip ${state.payout==='top2'?'on':''}" onclick="setPayout('top2')">Top 2 split</span>
+        <span class="chip ${state.payout==='top3'?'on':''}" onclick="setPayout('top3')">Top 3 split</span>
+      </div>
+      <div class="small muted" style="margin-top:8px">💰 Total pot: <b>${formatMoney(state.buyIn*state.players.length)}</b> — ${state.players.length} × ${formatMoney(state.buyIn)} each.</div>`
+      :`<div class="small muted" style="margin-top:8px">Add a buy-in to track the prize pot and who takes it home.</div>`}
+    </div>`:''}
   </div>
 
   <button class="btn primary block lg" onclick="startTournament()">Start tournament 🚀</button>
