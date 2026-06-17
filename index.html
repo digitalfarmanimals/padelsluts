@@ -464,6 +464,68 @@ function exportPDF(){
   window.print();
 }
 
+/* ---------- league / stats (local; same engine powers global later) ---------- */
+function standingsOf(snap){
+  const stats={};
+  (snap.players||[]).forEach(p=>{ stats[p.id]={id:p.id,name:p.name,wins:0,points:0,played:0}; });
+  (snap.rounds||[]).forEach(r=>(r.courts||[]).forEach(c=>{
+    if(c.scoreA==null||c.scoreB==null) return;
+    const aWin=c.scoreA>c.scoreB,bWin=c.scoreB>c.scoreA;
+    c.teamA.forEach(id=>{ if(stats[id]){stats[id].points+=c.scoreA;stats[id].played++;if(aWin)stats[id].wins++;} });
+    c.teamB.forEach(id=>{ if(stats[id]){stats[id].points+=c.scoreB;stats[id].played++;if(bWin)stats[id].wins++;} });
+  }));
+  return Object.values(stats).sort((a,b)=> snap.rankBy==="wins" ? (b.wins-a.wins||b.points-a.points) : (b.points-a.points||b.wins-a.wins));
+}
+function leagueStats(){
+  const P={}, pairs={};
+  const pl=(name)=>{ const k=name.toLowerCase(); if(!P[k])P[k]={name,tournaments:0,matches:0,wins:0,points:0,titles:0}; P[k].name=name; return P[k]; };
+  const addPair=(team,won,score)=>{ if(team.length<2)return; const k=[team[0].toLowerCase(),team[1].toLowerCase()].sort().join('|');
+    if(!pairs[k])pairs[k]={a:team[0],b:team[1],games:0,wins:0,points:0}; const pr=pairs[k]; pr.a=team[0];pr.b=team[1];pr.games++;pr.points+=score;if(won)pr.wins++; };
+  (history||[]).forEach(e=>{
+    const snap=e.snapshot; if(!snap) return;
+    const nameById={}; (snap.players||[]).forEach(p=>nameById[p.id]=p.name);
+    const seen=new Set();
+    (snap.rounds||[]).forEach(r=>(r.courts||[]).forEach(c=>{
+      if(c.scoreA==null||c.scoreB==null) return;
+      const aWin=c.scoreA>c.scoreB,bWin=c.scoreB>c.scoreA;
+      const tA=c.teamA.map(id=>nameById[id]).filter(Boolean), tB=c.teamB.map(id=>nameById[id]).filter(Boolean);
+      tA.forEach(n=>{const x=pl(n);x.matches++;x.points+=c.scoreA;if(aWin)x.wins++;seen.add(n.toLowerCase());});
+      tB.forEach(n=>{const x=pl(n);x.matches++;x.points+=c.scoreB;if(bWin)x.wins++;seen.add(n.toLowerCase());});
+      addPair(tA,aWin,c.scoreA); addPair(tB,bWin,c.scoreB);
+    }));
+    seen.forEach(k=>{ if(P[k])P[k].tournaments++; });
+    const st=standingsOf(snap).filter(p=>p.played>0);
+    if(st.length){ const t=st[0]; st.filter(p=>p.wins===t.wins&&p.points===t.points).forEach(w=>pl(w.name).titles++); }
+  });
+  const players=Object.values(P).map(p=>({...p, lp:p.wins*3+p.titles*15, winrate:p.matches?Math.round(p.wins/p.matches*100):0}))
+    .sort((a,b)=> b.lp-a.lp || b.points-a.points || b.winrate-a.winrate || a.name.localeCompare(b.name));
+  const duos=Object.values(pairs).map(d=>({...d, winrate:d.games?Math.round(d.wins/d.games*100):0}))
+    .filter(d=>d.games>=2).sort((a,b)=> b.wins-a.wins || b.winrate-a.winrate || b.points-a.points).slice(0,8);
+  return { players, duos };
+}
+function leagueHTML(){
+  const {players,duos}=leagueStats();
+  const back=`<button class="btn ghost sm" onclick="hideLeague()">← Back</button>`;
+  if(!players.length) return `<div class="card"><div class="ch" style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">🏆 League</h2>${back}</div><div class="muted" style="padding:10px 0">Play and save some games — your league table builds automatically.</div></div>`;
+  const medals=["🥇","🥈","🥉"];
+  const rows=players.map((p,i)=>`<tr class="${i===0?'top1':''}"><td class="rank">${i<3?medals[i]:(i+1)}</td><td>${esc(p.name)}</td><td class="num">${p.wins}</td><td class="num">${p.titles?('🏆'+p.titles):'–'}</td><td class="num active">${p.lp}</td></tr>`).join("");
+  const duoRows=duos.length?duos.map((d,i)=>`<tr><td class="rank">${i+1}</td><td>${esc(d.a)} <span class="amp">+</span> ${esc(d.b)}</td><td class="num">${d.wins}/${d.games}</td><td class="num active">${d.winrate}%</td></tr>`).join("")
+    :`<tr><td class="muted small" colspan="4">Play a few more games to surface your best partnerships.</td></tr>`;
+  return `
+  <div class="card">
+    <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h2 style="margin:0">🏆 League</h2>${back}</div>
+    <div class="small muted" style="margin-bottom:10px">Lifetime rankings across your saved games · PTS = wins×3 + titles×15</div>
+    <table><thead><tr><th class="rank">#</th><th>Player</th><th class="num">W</th><th class="num">🏆</th><th class="num active">PTS</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>
+  <div class="card">
+    <h2>🤝 Best partnerships</h2>
+    <div class="small muted" style="margin-bottom:10px">Who wins most together — find your perfect partner.</div>
+    <table><thead><tr><th class="rank">#</th><th>Duo</th><th class="num">Won</th><th class="num active">Win%</th></tr></thead><tbody>${duoRows}</tbody></table>
+  </div>`;
+}
+function showLeague(){ view="league"; render(); window.scrollTo(0,0); }
+function hideLeague(){ view=null; render(); window.scrollTo(0,0); }
+
 /* ---------- welcome / front door ---------- */
 function startNewGame(){ entered=true; newGame(false); }
 function resumeGame(){ entered=true; view=null; render(); window.scrollTo(0,0); }
@@ -484,6 +546,7 @@ function welcomeHTML(){
       <button class="btn primary block lg" style="margin-top:14px" onclick="startNewGame()">Start new game 🎾</button>
       ${resumeLabel?`<button class="btn ghost block" style="margin-top:10px" onclick="resumeGame()">${resumeLabel}</button>`:""}
       ${history.length?`<button class="btn ghost block" style="margin-top:10px" onclick="showHistory()">📋 Saved games (${history.length})</button>`:""}
+      ${history.length?`<button class="btn ghost block" style="margin-top:10px" onclick="showLeague()">🏆 League &amp; partner stats</button>`:""}
       <div class="small muted" style="margin-top:16px">📧 Email sign-in (to sync your games across all your devices) switches on soon — for now games save on this device.</div>
     </div>
   </div>`;
@@ -605,6 +668,7 @@ function resetAll(){
 function render(){
   const app=document.getElementById("app");
   if(view==="history"){ app.innerHTML=historyHTML(); return; }
+  if(view==="league"){ app.innerHTML=leagueHTML(); return; }
   if(!entered){ app.innerHTML=welcomeHTML(); return; }
   if(state.phase==="setup") app.innerHTML=setupHTML();
   else if(state.phase==="play") app.innerHTML=playHTML();
