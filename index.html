@@ -41,6 +41,13 @@
   .subtitle{font-family:var(--display);font-weight:400;font-size:15px;letter-spacing:7px;text-transform:uppercase;color:var(--accent);margin-top:2px;line-height:1;transform:skewX(-8deg)}
   .potHead{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
   .potTog{color:var(--muted);font-size:13px;font-weight:800;display:flex;align-items:center;gap:8px}
+  #printArea{display:none}
+  @media print{
+    .wrap{display:none !important}
+    #printArea{display:block !important}
+    body{background:#fff !important;padding:0 !important}
+    @page{margin:14mm}
+  }
   .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:14px 0;box-shadow:var(--shadow)}
   .card h2{margin:0 0 12px;font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:.6px;text-transform:uppercase}
   .row{display:flex;gap:10px;align-items:center}
@@ -74,7 +81,7 @@
   .histitem{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line)}
   .histitem:last-of-type{border-bottom:0}
   .hi-win{font-weight:700;font-size:15px;margin-bottom:3px}
-  .hi-actions{display:flex;gap:8px;flex-shrink:0}
+  .hi-actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
   .welcome .card{max-width:460px;margin:8px auto 0}
   .players{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
   .ptag{display:inline-flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:7px 8px 7px 14px;font-weight:700}
@@ -142,6 +149,7 @@
     <div id="app"></div>
     <div class="footer">Auto-saved on this device · works offline 🟢</div>
   </div>
+  <div id="printArea" aria-hidden="true"></div>
 
 <script>
 "use strict";
@@ -395,6 +403,66 @@ function deleteHistoryItem(id){ history=history.filter(h=>h.id!==id); saveHistor
 function clearHistory(){ if(!confirm("Delete all saved games? This can't be undone.")) return; history=[]; saveHistory(); render(); }
 function showHistory(){ view="history"; render(); window.scrollTo(0,0); }
 function hideHistory(){ view=null; render(); window.scrollTo(0,0); }
+function replayFromHistory(id){
+  const e=history.find(h=>h.id===id); if(!e||!e.snapshot) return;
+  const players=(e.snapshot.players||[]).map(p=>({id:uid(),name:p.name}));
+  if(!players.length) return;
+  archiveCurrent();
+  const snap=e.snapshot, fresh=JSON.parse(JSON.stringify(DEFAULT));
+  fresh.players=players;
+  fresh.pointsPerMatch=snap.pointsPerMatch; fresh.numRounds=snap.numRounds;
+  fresh.mode=snap.mode; fresh.pairing=snap.pairing; fresh.rankBy=snap.rankBy;
+  fresh.currency=snap.currency; fresh.payout=snap.payout; fresh.buyIn=snap.buyIn;
+  state=fresh; view=null; entered=true; save(); render(); window.scrollTo(0,0);
+}
+function exportPDF(){
+  const s=computeStandings();
+  const played=s.some(x=>x.played);
+  const top=s[0]||{wins:0,points:0};
+  const winners=played?s.filter(p=>p.wins===top.wins&&p.points===top.points):[];
+  const medals=["🥇","🥈","🥉"];
+  const d=new Date();
+  const date=d.toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'});
+  const rows=s.map((p,i)=>`<tr>
+    <td style="padding:8px 6px;border-bottom:1px solid #ddd;font-weight:700">${played&&i<3?medals[i]:(i+1)}</td>
+    <td style="padding:8px 6px;border-bottom:1px solid #ddd">${esc(p.name)}</td>
+    <td style="padding:8px 6px;border-bottom:1px solid #ddd;text-align:right">${p.played}</td>
+    <td style="padding:8px 6px;border-bottom:1px solid #ddd;text-align:right">${p.wins}</td>
+    <td style="padding:8px 6px;border-bottom:1px solid #ddd;text-align:right;font-weight:800">${p.points}</td>
+  </tr>`).join("");
+  let potHTML="";
+  if(state.buyIn>0){
+    const pp=potPayouts(s);
+    potHTML=`<h3 style="margin:20px 0 6px">The pot — ${formatMoney(pp.pot)}</h3>`+
+      (pp.payouts.length?`<table style="width:100%;border-collapse:collapse">${pp.payouts.map(p=>`<tr><td style="padding:5px 6px">${esc(p.name)}</td><td style="padding:5px 6px;text-align:right;font-weight:800">${formatMoney(p.amount)}</td></tr>`).join("")}</table>`:"");
+  }
+  const champ=played
+    ? `<div style="font-size:24px;font-weight:900;margin:10px 0 2px">👑 ${winners.map(w=>esc(w.name)).join(" &amp; ")}</div><div style="color:#555">${winners.length>1?"Tied champions":"Champion"} · ${plural(top.wins,"win")} · ${top.points} points</div>`
+    : `<div style="color:#555">No scores recorded.</div>`;
+  document.getElementById('printArea').innerHTML=`
+    <div style="font-family:Arial,Helvetica,sans-serif;color:#111;max-width:680px;margin:0 auto;padding:28px">
+      <div style="display:flex;align-items:center;gap:10px;border-bottom:3px solid #111;padding-bottom:10px">
+        <div style="width:40px;height:40px;border-radius:50%;background:#c8ff32;display:flex;align-items:center;justify-content:center;font-family:'Arial Black',Arial;font-weight:900;font-size:26px;color:#0b0e13">K</div>
+        <div style="font-size:28px;font-weight:900;letter-spacing:1px">KOURT <span style="font-weight:700;color:#777;font-size:15px;letter-spacing:3px">PADEL</span></div>
+      </div>
+      <h2 style="margin:16px 0 2px;text-transform:uppercase;letter-spacing:1px">Final Results</h2>
+      <div style="color:#666;margin-bottom:10px">${state.mode==='mexicano'?'Mexicano':'Americano'} · ${date}</div>
+      ${champ}
+      <table style="width:100%;border-collapse:collapse;margin-top:18px">
+        <thead><tr>
+          <th style="text-align:left;padding:6px;border-bottom:2px solid #111">#</th>
+          <th style="text-align:left;padding:6px;border-bottom:2px solid #111">Player</th>
+          <th style="text-align:right;padding:6px;border-bottom:2px solid #111">Played</th>
+          <th style="text-align:right;padding:6px;border-bottom:2px solid #111">Wins</th>
+          <th style="text-align:right;padding:6px;border-bottom:2px solid #111">Points</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      ${potHTML}
+      <div style="margin-top:26px;color:#999;font-size:12px;text-align:center">Generated by KOURT Padel</div>
+    </div>`;
+  window.print();
+}
 
 /* ---------- welcome / front door ---------- */
 function startNewGame(){ entered=true; newGame(false); }
@@ -434,6 +502,7 @@ function historyHTML(){
         <div class="small muted">${date}</div>
       </div>
       <div class="hi-actions">
+        <button class="btn cyan sm" onclick="replayFromHistory('${e.id}')">♻️ Replay</button>
         <button class="btn ghost sm" onclick="openFromHistory('${e.id}')">Open</button>
         <button class="btn danger sm" onclick="deleteHistoryItem('${e.id}')">✕</button>
       </div>
@@ -751,7 +820,10 @@ function resultsHTML(){
       <button class="btn primary" onclick="newGame(false)">🆕 New game</button>
       <button class="btn ghost" onclick="newGame(true)">Rematch — same players</button>
     </div>
-    <button class="btn ghost block" onclick="showHistory()">📋 Saved games (${history.length})</button>
+    <div class="actions">
+      <button class="btn ghost" onclick="exportPDF()">📄 Export PDF</button>
+      <button class="btn ghost" onclick="showHistory()">📋 Saved (${history.length})</button>
+    </div>
   </div>`;
 }
 
