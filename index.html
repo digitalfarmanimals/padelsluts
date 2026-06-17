@@ -88,6 +88,9 @@
   .tile:hover{border-color:var(--accent)}
   .tile:active{transform:translateY(1px)}
   .tile .ti{font-size:30px;line-height:1}
+  .tile .tic{width:46px;height:46px;border-radius:13px;background:rgba(200,255,50,.12);border:1px solid rgba(200,255,50,.26);display:inline-flex;align-items:center;justify-content:center;color:var(--accent)}
+  .tile .tic svg{width:25px;height:25px;display:block}
+  .tile.soon .tic{background:rgba(255,255,255,.06);border-color:var(--line);color:var(--muted)}
   .tile .tt{font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:.5px;text-transform:uppercase}
   .tile .ts{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-top:2px}
   .tile.soon{opacity:.7}
@@ -563,17 +566,24 @@ function goPlay(){
 }
 function homeHTML(){
   const inProg = state.phase==="play" && (state.rounds||[]).some(r=>r.courts.some(c=>c.scoreA!=null));
-  const t=(onclick,icon,title,sub,soon)=>`<div class="tile${soon?' soon':''}" onclick="${onclick}"><div class="ti">${icon}</div><div><div class="tt">${title}</div><div class="ts">${sub}</div></div></div>`;
+  const ICONS={
+    play:'<ellipse cx="10" cy="9" rx="5.6" ry="6.6"/><path d="M10 15.6V20.6"/><path d="M8.3 20.6h3.4"/><circle cx="18.2" cy="6.4" r="1.7"/>',
+    stats:'<path d="M5 20.5v-5"/><path d="M12 20.5v-10"/><path d="M19 20.5v-14"/>',
+    friends:'<circle cx="8.6" cy="8" r="3.1"/><circle cx="16.4" cy="9" r="2.5"/><path d="M3.2 20c0-3 2.4-4.8 5.4-4.8 1.7 0 3.2.6 4.1 1.7"/><path d="M14.8 14.6c2.6 0 4.4 1.8 4.4 4.4"/>',
+    events:'<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17"/><path d="M8 3v4"/><path d="M16 3v4"/><circle cx="12" cy="15" r="1.7" fill="currentColor" stroke="none"/>'
+  };
+  const ic=(k)=>`<span class="tic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg></span>`;
+  const t=(onclick,k,title,sub,soon)=>`<div class="tile${soon?' soon':''}" onclick="${onclick}">${ic(k)}<div><div class="tt">${title}</div><div class="ts">${sub}</div></div></div>`;
   const resume = inProg ? `<div class="card" onclick="goPlay()" style="cursor:pointer;border-color:var(--accent);display:flex;align-items:center;justify-content:space-between;gap:10px">
       <div><div style="font-weight:800">▶ Resume your game</div><div class="small muted">Round ${state.currentRound+1} of ${state.numRounds} · ${state.players.length} players</div></div>
       <span style="color:var(--accent);font-size:22px">→</span></div>` : "";
   return `
   ${resume}
   <div class="home-grid">
-    ${t('goPlay()','🎾', inProg?'Resume':'Play', inProg?('Round '+(state.currentRound+1)+' of '+state.numRounds):'Americano · Mexicano', false)}
-    ${t("goView('stats')",'📊','Stats','League · history · wins', false)}
-    ${t("goView('friends')",'🤝','Friends','Partner finder · invite', false)}
-    ${t("goView('events')",'🎉','Events','Parties &amp; socials · soon', true)}
+    ${t('goPlay()','play', inProg?'Resume':'Play', inProg?('Round '+(state.currentRound+1)+' of '+state.numRounds):'Americano · Mexicano', false)}
+    ${t("goView('stats')",'stats','Stats','League · history · wins', false)}
+    ${t("goView('friends')",'friends','Friends','Partner finder · invite', false)}
+    ${t("goView('events')",'events','Events','Parties &amp; socials · soon', true)}
   </div>`;
 }
 function statsHTML(){
@@ -963,7 +973,7 @@ function resultsHTML(){
 }
 
 /* ---------- boot ---------- */
-const APP_VERSION = "1.0";
+const APP_VERSION = "1.1";
 render();
 (function(){ var v=document.getElementById("ver"); if(v) v.textContent="v"+APP_VERSION; })();
 
