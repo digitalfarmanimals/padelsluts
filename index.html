@@ -549,8 +549,10 @@ function welcomeHTML(){
       <p class="small muted" style="margin:0 0 16px">Padel tournaments, leagues &amp; stats — for you and your crew.</p>
       <label class="fld">Your email</label>
       <input id="emailInput" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" value="${esc(userEmail)}" onchange="setEmail(this.value)" />
-      <button class="btn primary block lg" style="margin-top:14px" onclick="enterHome()">Enter 🎾</button>
-      <div class="small muted" style="margin-top:16px">📧 Real email sign-in (sync across devices) switches on soon — for now everything saves on this device.</div>
+      <button class="btn primary block lg" style="margin-top:14px" onclick="setEmail(document.getElementById('emailInput').value); sendMagicLink(document.getElementById('emailInput').value)">✉️ Email me a sign-in link</button>
+      <button class="btn ghost block" style="margin-top:10px" onclick="setEmail(document.getElementById('emailInput').value); enterHome()">Continue on this device</button>
+      ${authMsg?`<div class="small" style="margin-top:12px;font-weight:700;color:${/Check|Sent|Sending|✉️/.test(authMsg)?'var(--accent)':'var(--danger)'}">${esc(authMsg)}</div>`:""}
+      <div class="small muted" style="margin-top:14px">Sign in to sync your games, league &amp; contacts across devices — or just continue on this device.</div>
     </div>
   </div>`;
 }
@@ -577,7 +579,9 @@ function homeHTML(){
   const resume = inProg ? `<div class="card" onclick="goPlay()" style="cursor:pointer;border-color:var(--accent);display:flex;align-items:center;justify-content:space-between;gap:10px">
       <div><div style="font-weight:800">▶ Resume your game</div><div class="small muted">Round ${state.currentRound+1} of ${state.numRounds} · ${state.players.length} players</div></div>
       <span style="color:var(--accent);font-size:22px">→</span></div>` : "";
+  const authBar = authUser ? `<div class="small muted" style="text-align:right;margin-bottom:8px">✅ Signed in as ${esc(authUser.email||"you")} · <span onclick="signOut()" style="color:var(--cyan);cursor:pointer;font-weight:700">Sign out</span></div>` : "";
   return `
+  ${authBar}
   ${resume}
   <div class="home-grid">
     ${t('goPlay()','play', inProg?'Resume':'Play', inProg?('Round '+(state.currentRound+1)+' of '+state.numRounds):'Americano · Mexicano', false)}
@@ -613,7 +617,12 @@ function friendsHTML(){
   </div>
   <div class="card">
     <h2>📨 Invite your crew</h2>
-    <div class="muted small" style="margin-top:4px">Invite players by email and build a contacts list of your regulars — switches on with the backend. Coming very soon.</div>
+    <div class="muted small" style="margin:4px 0 10px">Send a mate a sign-in link by email so they can join KOURT.</div>
+    <div class="row">
+      <input id="inviteEmail" type="email" inputmode="email" autocomplete="off" placeholder="their@email.com" />
+      <button class="btn primary" onclick="sendMagicLink(document.getElementById('inviteEmail').value)">Invite</button>
+    </div>
+    ${authMsg?`<div class="small" style="margin-top:10px;font-weight:700;color:${/Check|Sent|Sending|✉️/.test(authMsg)?'var(--accent)':'var(--danger)'}">${esc(authMsg)}</div>`:""}
   </div>`;
 }
 function eventsHTML(){
@@ -972,10 +981,47 @@ function resultsHTML(){
   </div>`;
 }
 
+/* ---------- Supabase auth — KOURT project only (anon public key; never service_role) ---------- */
+const SUPABASE_URL = "https://yeuyjgjxypqflynephhq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlldXlqZ2p4eXBxZmx5bmVwaGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDE3ODYsImV4cCI6MjA5NzI3Nzc4Nn0.JsOcrIJ19_LS1WX5h4Sjeh-lOENV2GZr28BFd8uuW9M";
+let sb=null, authUser=null, authMsg="";
+function loadSupabase(){
+  if(window.supabase){ initSupabase(); return; }
+  var s=document.createElement("script");
+  s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  s.onload=initSupabase; s.onerror=function(){};
+  document.head.appendChild(s);
+}
+function initSupabase(){
+  try{
+    if(!window.supabase || sb) return;
+    sb=window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sb.auth.getSession().then(function(r){ authUser=(r.data&&r.data.session)?r.data.session.user:null; if(authUser) render(); });
+    sb.auth.onAuthStateChange(function(evt, session){
+      authUser = session ? session.user : null;
+      if(evt==="SIGNED_IN"){ authMsg=""; if(authUser&&authUser.email) setEmail(authUser.email); entered=true; view="home"; }
+      render();
+    });
+  }catch(e){}
+}
+async function sendMagicLink(email){
+  email=(email||"").trim();
+  if(!email||email.indexOf("@")<1){ authMsg="Enter a valid email first."; render(); return; }
+  if(!sb){ authMsg="Can't reach the server — check your connection and try again."; render(); return; }
+  authMsg="Sending…"; render();
+  try{
+    var res=await sb.auth.signInWithOtp({ email:email, options:{ emailRedirectTo: location.origin+location.pathname } });
+    authMsg = res.error ? ("Couldn't send: "+res.error.message) : ("✉️ Sent! Check "+email+" for the sign-in link.");
+  }catch(e){ authMsg="Something went wrong sending the link."; }
+  render();
+}
+async function signOut(){ try{ if(sb) await sb.auth.signOut(); }catch(e){} authUser=null; authMsg=""; render(); }
+
 /* ---------- boot ---------- */
-const APP_VERSION = "1.1";
+const APP_VERSION = "1.2";
 render();
 (function(){ var v=document.getElementById("ver"); if(v) v.textContent="v"+APP_VERSION; })();
+loadSupabase();
 
 /* ---------- PWA: offline + installable + auto-update ---------- */
 if("serviceWorker" in navigator){
