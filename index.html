@@ -548,8 +548,11 @@ function startNewGame(){ entered=true; newGame(false); }
 function resumeGame(){ entered=true; view=null; render(); window.scrollTo(0,0); }
 function welcomeHTML(){
   const greet = userEmail ? "Welcome back 👋" : "Welcome to KOURT 👋";
+  const invited = new URLSearchParams(location.search).get("invite");
+  const inviteBanner = invited ? `<div class="card" style="max-width:460px;margin:0 auto 12px;border-color:var(--accent);background:rgba(200,255,50,.10)"><div style="font-weight:800">🎾 You've been invited to KOURT!</div><div class="small muted" style="margin-top:2px">Sign in below to join your crew.</div></div>` : "";
   return `
   <div class="welcome">
+    ${inviteBanner}
     <div class="card">
       <h2 style="margin:0 0 4px">${greet}</h2>
       <p class="small muted" style="margin:0 0 16px">Padel tournaments, leagues &amp; stats — for you and your crew.</p>
@@ -623,12 +626,13 @@ function friendsHTML(){
   </div>
   <div class="card">
     <h2>📨 Invite your crew</h2>
-    <div class="muted small" style="margin:4px 0 10px">Send a mate a sign-in link by email so they can join KOURT.</div>
+    <div class="muted small" style="margin:4px 0 10px">Email them a sign-in link, or share an invite link anywhere (WhatsApp, etc.).</div>
     <div class="row">
       <input id="inviteEmail" type="email" inputmode="email" autocomplete="off" placeholder="their@email.com" />
       <button class="btn primary" onclick="sendMagicLink(document.getElementById('inviteEmail').value)">Invite</button>
     </div>
-    ${authMsg?`<div class="small" style="margin-top:10px;font-weight:700;color:${/Check|Sent|Sending|✉️/.test(authMsg)?'var(--accent)':'var(--danger)'}">${esc(authMsg)}</div>`:""}
+    <button class="btn ghost block" style="margin-top:10px" onclick="createInviteLink()">🔗 Create &amp; share invite link</button>
+    ${authMsg?`<div class="small" style="margin-top:10px;font-weight:700;color:${/Check|Sent|Sending|✉️|copied|🔗/.test(authMsg)?'var(--accent)':'var(--danger)'}">${esc(authMsg)}</div>`:""}
   </div>`;
 }
 function eventsHTML(){
@@ -1058,8 +1062,22 @@ async function cloudLoadGames(){
   }catch(e){}
 }
 
+/* ---------- shareable invite link ---------- */
+function inviteUrl(){ return location.origin + location.pathname + "?invite=1"; }
+async function createInviteLink(){
+  var url=inviteUrl();
+  var text="🎾 Join me on KOURT — padel tournaments, leagues & stats. Jump in:";
+  if(navigator.share){
+    try{ await navigator.share({ title:"KOURT", text:text, url:url }); return; }
+    catch(e){ if(e&&e.name==="AbortError") return; }
+  }
+  try{ await navigator.clipboard.writeText(url); authMsg="🔗 Invite link copied — paste it into WhatsApp!"; }
+  catch(e){ authMsg="Your invite link: "+url; }
+  render();
+}
+
 /* ---------- boot ---------- */
-const APP_VERSION = "1.4";
+const APP_VERSION = "1.5";
 render();
 (function(){ var v=document.getElementById("ver"); if(v) v.textContent="v"+APP_VERSION; })();
 loadSupabase();
