@@ -559,9 +559,8 @@ function welcomeHTML(){
       <label class="fld">Your email</label>
       <input id="emailInput" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" value="${esc(userEmail)}" onchange="setEmail(this.value)" />
       <button class="btn primary block lg" style="margin-top:14px" onclick="setEmail(document.getElementById('emailInput').value); sendMagicLink(document.getElementById('emailInput').value)">✉️ Email me a sign-in link</button>
-      <button class="btn ghost block" style="margin-top:10px" onclick="setEmail(document.getElementById('emailInput').value); enterHome()">Continue on this device</button>
       ${authMsg?`<div class="small" style="margin-top:12px;font-weight:700;color:${/Check|Sent|Sending|✉️/.test(authMsg)?'var(--accent)':'var(--danger)'}">${esc(authMsg)}</div>`:""}
-      <div class="small muted" style="margin-top:14px">Sign in to sync your games, league &amp; contacts across devices — or just continue on this device.</div>
+      <div class="small muted" style="margin-top:14px">We'll email you a secure sign-in link — no password. Your games, league &amp; stats sync to your account across devices.</div>
     </div>
   </div>`;
 }
@@ -632,6 +631,8 @@ function friendsHTML(){
       <button class="btn primary" onclick="sendMagicLink(document.getElementById('inviteEmail').value)">Invite</button>
     </div>
     <button class="btn ghost block" style="margin-top:10px" onclick="createInviteLink()">🔗 Create &amp; share invite link</button>
+    <button class="btn ghost block" style="margin-top:8px" onclick="toggleInviteQR()">📷 ${showQR?'Hide':'Show'} QR code</button>
+    ${showQR ? (window.qrcode ? `<div style="text-align:center;margin-top:12px"><img src="${inviteQRDataUrl()}" alt="Invite QR code" style="width:210px;height:210px;border-radius:14px;background:#fff;padding:10px"/><div class="small muted" style="margin-top:6px">Scan to join KOURT 🎾</div></div>` : `<div class="small muted" style="text-align:center;margin-top:12px">Loading QR…</div>`) : ""}
     ${authMsg?`<div class="small" style="margin-top:10px;font-weight:700;color:${/Check|Sent|Sending|✉️|copied|🔗/.test(authMsg)?'var(--accent)':'var(--danger)'}">${esc(authMsg)}</div>`:""}
   </div>`;
 }
@@ -761,14 +762,15 @@ function resetAll(){
 /* ---------- render ---------- */
 function render(){
   const app=document.getElementById("app");
-  document.body.classList.toggle("hero", !entered && !view);
+  document.body.classList.toggle("hero", authReady && !authUser);
+  if(!authReady){ app.innerHTML=`<div class="welcome"><div class="card" style="text-align:center"><div class="small muted" style="padding:10px 0">Loading…</div></div></div>`; return; }
+  if(!authUser){ app.innerHTML=welcomeHTML(); return; }      // must sign in with email to enter
   if(view==="history"){ app.innerHTML=historyHTML(); return; }
   if(view==="league"){ app.innerHTML=leagueHTML(); return; }
   if(view==="stats"){ app.innerHTML=statsHTML(); return; }
   if(view==="friends"){ app.innerHTML=friendsHTML(); return; }
   if(view==="events"){ app.innerHTML=eventsHTML(); return; }
-  if(entered && view==="home"){ app.innerHTML=homeHTML(); return; }
-  if(!entered){ app.innerHTML=welcomeHTML(); return; }
+  if(view==="home"){ app.innerHTML=homeHTML(); return; }
   if(state.phase==="setup") app.innerHTML=setupHTML();
   else if(state.phase==="play") app.innerHTML=playHTML();
   else app.innerHTML=resultsHTML();
@@ -995,22 +997,29 @@ function resultsHTML(){
 /* ---------- Supabase auth — KOURT project only (anon public key; never service_role) ---------- */
 const SUPABASE_URL = "https://yeuyjgjxypqflynephhq.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlldXlqZ2p4eXBxZmx5bmVwaGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDE3ODYsImV4cCI6MjA5NzI3Nzc4Nn0.JsOcrIJ19_LS1WX5h4Sjeh-lOENV2GZr28BFd8uuW9M";
-let sb=null, authUser=null, authMsg="";
+let sb=null, authUser=null, authMsg="", authReady=false;
 function loadSupabase(){
+  setTimeout(function(){ if(!authReady){ authReady=true; render(); } }, 4500);  // never stuck on "Loading"
   if(window.supabase){ initSupabase(); return; }
   var s=document.createElement("script");
   s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-  s.onload=initSupabase; s.onerror=function(){};
+  s.onload=initSupabase; s.onerror=function(){ authReady=true; render(); };
   document.head.appendChild(s);
 }
 function initSupabase(){
   try{
     if(!window.supabase || sb) return;
     sb=window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    sb.auth.getSession().then(function(r){ authUser=(r.data&&r.data.session)?r.data.session.user:null; if(authUser){ render(); cloudLoadGames(); } });
+    sb.auth.getSession().then(function(r){
+      authUser=(r.data&&r.data.session)?r.data.session.user:null;
+      authReady=true;
+      if(authUser){ if(!view) view="home"; render(); cloudLoadGames(); } else { render(); }
+    });
     sb.auth.onAuthStateChange(function(evt, session){
       authUser = session ? session.user : null;
-      if(evt==="SIGNED_IN"){ authMsg=""; if(authUser&&authUser.email) setEmail(authUser.email); entered=true; view="home"; cloudLoadGames(); }
+      authReady=true;
+      if(evt==="SIGNED_IN"){ authMsg=""; if(authUser&&authUser.email) setEmail(authUser.email); view="home"; cloudLoadGames(); }
+      if(evt==="SIGNED_OUT"){ view=null; }
       render();
     });
   }catch(e){}
@@ -1075,9 +1084,13 @@ async function createInviteLink(){
   catch(e){ authMsg="Your invite link: "+url; }
   render();
 }
+let showQR=false;
+function loadQRLib(cb){ if(window.qrcode){ cb(); return; } var s=document.createElement("script"); s.src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"; s.onload=cb; s.onerror=function(){}; document.head.appendChild(s); }
+function toggleInviteQR(){ showQR=!showQR; if(showQR && !window.qrcode){ loadQRLib(function(){ render(); }); } render(); }
+function inviteQRDataUrl(){ try{ var qr=qrcode(0,"M"); qr.addData(inviteUrl()); qr.make(); return qr.createDataURL(6,8); }catch(e){ return ""; } }
 
 /* ---------- boot ---------- */
-const APP_VERSION = "1.5";
+const APP_VERSION = "1.6";
 render();
 (function(){ var v=document.getElementById("ver"); if(v) v.textContent="v"+APP_VERSION; })();
 loadSupabase();
