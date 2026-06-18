@@ -172,7 +172,7 @@
 
 /* ---------- state ---------- */
 const KEY = "padelsluts.v1";
-const DEFAULT = { players:[], pointsPerMatch:24, numRounds:5, rounds:[], currentRound:0, phase:"setup", rankBy:"points", mode:"americano", pairing:"smart", buyIn:0, currency:"£", payout:"all" };
+const DEFAULT = { players:[], pointsPerMatch:24, numRounds:5, rounds:[], currentRound:0, phase:"setup", rankBy:"points", mode:"americano", pairing:"smart", buyIn:0, currency:"£", payout:"all", courts:0 };
 let state = load();
 let history = loadHistory();
 let view = null;
@@ -208,7 +208,9 @@ function pickByes(ids){
   const byeCount={}; ids.forEach(id=>byeCount[id]=0);
   state.rounds.forEach(r=> r.byes.forEach(id=>{ if(byeCount[id]!=null) byeCount[id]++; }));
   const ordered=shuffle(ids).sort((a,b)=> byeCount[a]-byeCount[b]);
-  return ordered.slice(0, ids.length%4);
+  const maxCourts = state.courts>0 ? state.courts : Infinity;            // 0 = use all courts (auto)
+  const courts = Math.min(maxCourts, Math.floor(ids.length/4));
+  return ordered.slice(0, ids.length - courts*4);                        // everyone over the court limit sits out
 }
 function chunkTeams(arr){
   const courts=[];
@@ -324,6 +326,7 @@ function addPlayer(){
 function removePlayer(id){ state.players=state.players.filter(p=>p.id!==id); save(); render(); }
 function setPoints(v){ state.pointsPerMatch=v; save(); render(); }
 function setRounds(v){ state.numRounds=v; save(); render(); }
+function setCourts(v){ state.courts=Math.max(0,v||0); save(); render(); }
 function setMode(m){ state.mode=m; save(); render(); }
 function setPairing(p){ state.pairing=p; save(); render(); }
 function setRankBy(v){ state.rankBy=v; save(); if(state.phase==="play") refreshLive(); else render(); }
@@ -407,7 +410,7 @@ function newGame(keepPlayers){
   fresh.players = keepPlayers ? state.players.map(p=>({id:p.id,name:p.name})) : [];
   fresh.pointsPerMatch=state.pointsPerMatch; fresh.numRounds=state.numRounds;
   fresh.mode=state.mode; fresh.pairing=state.pairing; fresh.rankBy=state.rankBy;
-  fresh.currency=state.currency; fresh.payout=state.payout; fresh.buyIn=state.buyIn;
+  fresh.currency=state.currency; fresh.payout=state.payout; fresh.buyIn=state.buyIn; fresh.courts=state.courts;
   state=fresh; view=null; save(); render(); window.scrollTo(0,0);
 }
 function openFromHistory(id){
@@ -429,7 +432,7 @@ function replayFromHistory(id){
   fresh.players=players;
   fresh.pointsPerMatch=snap.pointsPerMatch; fresh.numRounds=snap.numRounds;
   fresh.mode=snap.mode; fresh.pairing=snap.pairing; fresh.rankBy=snap.rankBy;
-  fresh.currency=snap.currency; fresh.payout=snap.payout; fresh.buyIn=snap.buyIn;
+  fresh.currency=snap.currency; fresh.payout=snap.payout; fresh.buyIn=snap.buyIn; fresh.courts=snap.courts;
   state=fresh; view=null; entered=true; save(); render(); window.scrollTo(0,0);
 }
 function exportPDF(){
@@ -680,9 +683,10 @@ function startTournament(){
   const err=document.getElementById("setupErr");
   const pts=Math.max(2, Math.round(+document.getElementById("pointsInput").value||0));
   const rnd=Math.max(1, Math.round(+document.getElementById("roundsInput").value||0));
+  const ci=document.getElementById("courtsInput"); const cts=ci?Math.max(0,Math.round(+ci.value||0)):state.courts;
   if(state.players.length<4){ err.textContent="Add at least 4 players to start a padel match (4 per court)."; return; }
   archiveCurrent();
-  state.pointsPerMatch=pts; state.numRounds=rnd;
+  state.pointsPerMatch=pts; state.numRounds=rnd; state.courts=cts;
   state.id=uid(); state.rounds=[]; state.rounds.push(buildRound()); state.currentRound=0; state.phase="play";
   save(); render(); window.scrollTo(0,0);
 }
@@ -781,11 +785,13 @@ function setupHTML(){
   const playersHTML = state.players.length
     ? state.players.map(p=>`<span class="ptag">${esc(p.name)}<button class="x" onclick="removePlayer('${p.id}')" aria-label="remove">×</button></span>`).join("")
     : `<span class="muted small">No players yet — add your crew above.</span>`;
-  const courts = Math.floor(state.players.length/4);
-  const sitting = state.players.length%4;
+  const maxC = state.courts>0 ? state.courts : Infinity;
+  const courts = Math.min(maxC, Math.floor(state.players.length/4));
+  const sitting = state.players.length - courts*4;
+  const courtsHint = state.players.length>=4 ? ` <b>${state.players.length}</b> players → <b>${plural(courts,"court")}</b>, <b>${sitting}</b> sit out.` : "";
   let plan = state.players.length<4
     ? `<span class="muted">Add at least 4 players (4 per court).</span>`
-    : `<b>${plural(courts,"court")}</b> per round` + (sitting? ` · <b>${sitting}</b> sit out & rotate each round`:` · everyone plays every round 🎉`);
+    : `<b>${plural(courts,"court")}</b> per round` + (sitting>0? ` · <b>${sitting}</b> sit out & rotate each round`:` · everyone plays every round 🎉`);
 
   return `
   <div class="actions" style="margin-bottom:4px"><button class="btn ghost sm" onclick="goHome()">← Home</button></div>
@@ -826,6 +832,15 @@ function setupHTML(){
         <div class="small muted" style="margin-top:8px">${plan}</div>
       </div>
     </div>
+    <hr class="hr" />
+    <label class="fld">Courts available</label>
+    <input id="courtsInput" type="number" inputmode="numeric" min="0" placeholder="All courts" value="${state.courts||''}"
+      onchange="setCourts(Math.max(0,Math.round(+this.value||0)))" style="max-width:170px" />
+    <div class="chips" style="margin-top:8px">
+      <span class="chip ${!state.courts?'on':''}" onclick="setCourts(0)">All</span>
+      ${[1,2,3,4].map(v=>`<span class="chip ${state.courts===v?'on':''}" onclick="setCourts(${v})">${v}</span>`).join("")}
+    </div>
+    <div class="small muted" style="margin-top:8px">How many courts you've got — extra players sit out &amp; rotate fairly.${courtsHint}</div>
     ${state.mode!=='mexicano' ? `<hr class="hr" />
     <label class="fld">Pairing</label>
     <div class="chips">
@@ -1090,7 +1105,7 @@ function toggleInviteQR(){ showQR=!showQR; if(showQR && !window.qrcode){ loadQRL
 function inviteQRDataUrl(){ try{ var qr=qrcode(0,"M"); qr.addData(inviteUrl()); qr.make(); return qr.createDataURL(6,8); }catch(e){ return ""; } }
 
 /* ---------- boot ---------- */
-const APP_VERSION = "1.6";
+const APP_VERSION = "1.7";
 render();
 (function(){ var v=document.getElementById("ver"); if(v) v.textContent="v"+APP_VERSION; })();
 loadSupabase();
