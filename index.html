@@ -172,7 +172,7 @@
 
 /* ---------- state ---------- */
 const KEY = "padelsluts.v1";
-const DEFAULT = { players:[], pointsPerMatch:24, numRounds:5, rounds:[], currentRound:0, phase:"setup", rankBy:"points", mode:"americano", pairing:"smart", buyIn:0, currency:"£", payout:"all", courts:0 };
+const DEFAULT = { players:[], pointsPerMatch:24, numRounds:5, rounds:[], currentRound:0, phase:"setup", rankBy:"points", mode:"americano", pairing:"smart", buyIn:0, currency:"£", payout:"all", courts:0, liveCode:null };
 let state = load();
 let history = loadHistory();
 let view = null;
@@ -191,7 +191,7 @@ function load(){
   }catch(e){}
   return JSON.parse(JSON.stringify(DEFAULT));
 }
-function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} if(state.liveCode) pushLive(); }
 
 /* ---------- helpers ---------- */
 function esc(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
@@ -551,8 +551,9 @@ function startNewGame(){ entered=true; newGame(false); }
 function resumeGame(){ entered=true; view=null; render(); window.scrollTo(0,0); }
 function welcomeHTML(){
   const greet = userEmail ? "Welcome back 👋" : "Welcome to KOURT 👋";
-  const invited = new URLSearchParams(location.search).get("invite");
-  const inviteBanner = invited ? `<div class="card" style="max-width:460px;margin:0 auto 12px;border-color:var(--accent);background:rgba(200,255,50,.10)"><div style="font-weight:800">🎾 You've been invited to KOURT!</div><div class="small muted" style="margin-top:2px">Sign in below to join your crew.</div></div>` : "";
+  const params = new URLSearchParams(location.search);
+  const invited = params.get("invite"), liveJoin = params.get("live");
+  const inviteBanner = (invited||liveJoin) ? `<div class="card" style="max-width:460px;margin:0 auto 12px;border-color:var(--accent);background:rgba(200,255,50,.10)"><div style="font-weight:800">${liveJoin?'🔴 Join the LIVE game!':'🎾 You\'ve been invited to KOURT!'}</div><div class="small muted" style="margin-top:2px">Sign in below to ${liveJoin?'watch it live':'join your crew'}.</div></div>` : "";
   return `
   <div class="welcome">
     ${inviteBanner}
@@ -769,6 +770,7 @@ function render(){
   document.body.classList.toggle("hero", authReady && !authUser);
   if(!authReady){ app.innerHTML=`<div class="welcome"><div class="card" style="text-align:center"><div class="small muted" style="padding:10px 0">Loading…</div></div></div>`; return; }
   if(!authUser){ app.innerHTML=welcomeHTML(); return; }      // must sign in with email to enter
+  if(liveView){ app.innerHTML=liveScoreboardHTML(); return; }   // viewer watching a live game
   if(view==="history"){ app.innerHTML=historyHTML(); return; }
   if(view==="league"){ app.innerHTML=leagueHTML(); return; }
   if(view==="stats"){ app.innerHTML=statsHTML(); return; }
@@ -915,6 +917,15 @@ function playHTML(){
     <div class="bar"><span style="width:${pct}%"></span></div>
   </div>
 
+  ${state.liveCode
+    ? `<div class="card" style="border-color:var(--accent)">
+        <div class="ch" style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:800">🔴 LIVE · code <span style="color:var(--accent);letter-spacing:2px">${state.liveCode}</span></span><button class="btn ghost sm" onclick="stopLive()">Stop</button></div>
+        <div class="small muted" style="margin-top:4px">Anyone who scans watches your scores update in real time.</div>
+        <button class="btn ghost block" style="margin-top:10px" onclick="toggleLiveQR()">📷 ${showLiveQR?'Hide':'Show'} QR code</button>
+        ${showLiveQR ? (window.qrcode ? `<div style="text-align:center;margin-top:12px"><img src="${qrFor(liveUrl())}" alt="Live game QR" style="width:200px;height:200px;border-radius:14px;background:#fff;padding:10px"/><div class="small muted" style="margin-top:6px">Scan to watch live 🎾</div></div>` : `<div class="small muted" style="text-align:center;margin-top:12px">Loading QR…</div>`) : ''}
+      </div>`
+    : `<div class="card"><button class="btn cyan block" onclick="goLive()">📡 Go live — let everyone watch</button><div class="small muted" style="margin-top:8px;text-align:center">Creates a QR; anyone who scans sees scores update in real time.</div></div>`}
+
   <div class="card">
     <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
       <h2 style="margin:0">Matches</h2>
@@ -1013,6 +1024,7 @@ function resultsHTML(){
 const SUPABASE_URL = "https://yeuyjgjxypqflynephhq.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlldXlqZ2p4eXBxZmx5bmVwaGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDE3ODYsImV4cCI6MjA5NzI3Nzc4Nn0.JsOcrIJ19_LS1WX5h4Sjeh-lOENV2GZr28BFd8uuW9M";
 let sb=null, authUser=null, authMsg="", authReady=false;
+let liveView=null, liveChannel=null, _liveTimer=null;
 function loadSupabase(){
   setTimeout(function(){ if(!authReady){ authReady=true; render(); } }, 4500);  // never stuck on "Loading"
   if(window.supabase){ initSupabase(); return; }
@@ -1028,13 +1040,13 @@ function initSupabase(){
     sb.auth.getSession().then(function(r){
       authUser=(r.data&&r.data.session)?r.data.session.user:null;
       authReady=true;
-      if(authUser){ if(!view) view="home"; render(); cloudLoadGames(); } else { render(); }
+      if(authUser){ if(!view) view="home"; render(); cloudLoadGames(); maybeJoinLive(); } else { render(); }
     });
     sb.auth.onAuthStateChange(function(evt, session){
       authUser = session ? session.user : null;
       authReady=true;
-      if(evt==="SIGNED_IN"){ authMsg=""; if(authUser&&authUser.email) setEmail(authUser.email); view="home"; cloudLoadGames(); }
-      if(evt==="SIGNED_OUT"){ view=null; }
+      if(evt==="SIGNED_IN"){ authMsg=""; if(authUser&&authUser.email) setEmail(authUser.email); view="home"; cloudLoadGames(); maybeJoinLive(); }
+      if(evt==="SIGNED_OUT"){ view=null; liveView=null; }
       render();
     });
   }catch(e){}
@@ -1099,13 +1111,76 @@ async function createInviteLink(){
   catch(e){ authMsg="Your invite link: "+url; }
   render();
 }
-let showQR=false;
+let showQR=false, showLiveQR=false;
 function loadQRLib(cb){ if(window.qrcode){ cb(); return; } var s=document.createElement("script"); s.src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"; s.onload=cb; s.onerror=function(){}; document.head.appendChild(s); }
+function qrFor(text){ try{ var qr=qrcode(0,"M"); qr.addData(text); qr.make(); return qr.createDataURL(6,8); }catch(e){ return ""; } }
 function toggleInviteQR(){ showQR=!showQR; if(showQR && !window.qrcode){ loadQRLib(function(){ render(); }); } render(); }
-function inviteQRDataUrl(){ try{ var qr=qrcode(0,"M"); qr.addData(inviteUrl()); qr.make(); return qr.createDataURL(6,8); }catch(e){ return ""; } }
+function inviteQRDataUrl(){ return qrFor(inviteUrl()); }
+
+/* ---------- live game sync (Supabase Realtime; watch-along) ---------- */
+function liveUrl(){ return location.origin + location.pathname + "?live=" + (state.liveCode||""); }
+function genLiveCode(){ var c="", a="ACDEFGHJKLMNPQRSTUVWXYZ23456789"; for(var i=0;i<5;i++) c+=a[Math.floor(Math.random()*a.length)]; return c; }
+async function pushLiveNow(){
+  if(!sb||!authUser||!state.liveCode) return;
+  try{ await sb.from("live_games").upsert({ code:state.liveCode, host_id:authUser.id, state:JSON.parse(JSON.stringify(state)), updated_at:new Date().toISOString() }, { onConflict:"code" }); }catch(e){}
+}
+function pushLive(){ if(!state.liveCode||!sb||!authUser) return; clearTimeout(_liveTimer); _liveTimer=setTimeout(pushLiveNow, 350); }
+async function goLive(){
+  if(!sb||!authUser){ authMsg="Sign in to go live."; render(); return; }
+  if(!state.liveCode) state.liveCode=genLiveCode();
+  showLiveQR=true; if(!window.qrcode) loadQRLib(render);
+  save(); await pushLiveNow(); render(); window.scrollTo(0,0);
+}
+async function stopLive(){
+  var code=state.liveCode;
+  if(sb&&authUser&&code){ try{ await sb.from("live_games").delete().eq("code",code).eq("host_id",authUser.id); }catch(e){} }
+  state.liveCode=null; showLiveQR=false; save(); render();
+}
+function toggleLiveQR(){ showLiveQR=!showLiveQR; if(showLiveQR && !window.qrcode) loadQRLib(render); render(); }
+function maybeJoinLive(){ try{ var c=new URLSearchParams(location.search).get("live"); if(c && authUser && !liveView) joinLive(c); }catch(e){} }
+async function joinLive(code){
+  if(!sb||!code) return;
+  liveView={ code:code, state:null, loading:true }; render();
+  try{ var res=await sb.from("live_games").select("state").eq("code",code).maybeSingle(); liveView.state=(res&&res.data&&res.data.state)?res.data.state:null; }catch(e){ liveView.state=null; }
+  liveView.loading=false; render();
+  try{
+    if(liveChannel) sb.removeChannel(liveChannel);
+    liveChannel=sb.channel("live-"+code).on("postgres_changes", { event:"*", schema:"public", table:"live_games", filter:"code=eq."+code }, function(payload){
+      if(payload && payload.eventType==="DELETE"){ if(liveView) liveView.state=null; render(); return; }
+      if(payload && payload.new && payload.new.state){ if(liveView) liveView.state=payload.new.state; render(); }
+    }).subscribe();
+  }catch(e){}
+}
+function leaveLive(){ try{ if(liveChannel) sb.removeChannel(liveChannel); }catch(e){} liveChannel=null; liveView=null; try{ var u=new URL(location.href); u.searchParams.delete("live"); history.replaceState(null,"",u); }catch(e){} render(); }
+function liveScoreboardHTML(){
+  const back=`<button class="btn ghost sm" onclick="leaveLive()">← Leave</button>`;
+  if(liveView.loading) return `<div class="card"><div class="muted" style="padding:12px 0">Connecting to the live game…</div></div>`;
+  if(!liveView.state) return `<div class="card"><div class="ch" style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Live game</h2>${back}</div><div class="muted" style="padding:10px 0">This live game isn't running right now — the host may not have started it yet, or has ended it.</div></div>`;
+  const s=liveView.state, ri=s.currentRound||0, round=(s.rounds||[])[ri], nm={};
+  (s.players||[]).forEach(p=>nm[p.id]=p.name);
+  const standings=standingsOf(s);
+  const courtsHTML = round && round.courts ? round.courts.map((c,i)=>{
+    const aW=c.scoreA!=null&&c.scoreB!=null&&c.scoreA>c.scoreB, bW=c.scoreA!=null&&c.scoreB!=null&&c.scoreB>c.scoreA;
+    return `<div class="court"><div class="ch"><span class="name">🏟️ Court ${i+1}</span></div>
+      <div class="team${aW?' win':''}"><div class="names">${c.teamA.map(id=>esc(nm[id]||'?')).join(' <span class="amp">+</span> ')}</div><div class="score" style="font-size:22px;font-weight:800">${c.scoreA==null?'–':c.scoreA}</div></div>
+      <div class="vs">vs</div>
+      <div class="team${bW?' win':''}"><div class="names">${c.teamB.map(id=>esc(nm[id]||'?')).join(' <span class="amp">+</span> ')}</div><div class="score" style="font-size:22px;font-weight:800">${c.scoreB==null?'–':c.scoreB}</div></div></div>`;
+  }).join("") : `<div class="muted" style="padding:8px 0">Waiting for the round to start…</div>`;
+  const rows=standings.map((p,i)=>`<tr class="${i===0?'top1':''}"><td class="rank">${i<3?['🥇','🥈','🥉'][i]:(i+1)}</td><td>${esc(p.name)}</td><td class="num">${p.wins}</td><td class="num active">${p.points}</td></tr>`).join("");
+  return `
+  <div class="card">
+    <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h2 style="margin:0">🔴 LIVE · Round ${ri+1}${s.numRounds?' / '+s.numRounds:''}</h2>${back}</div>
+    <div class="small muted" style="margin-bottom:8px">${s.mode==='mexicano'?'Mexicano':'Americano'} · updates in real time as scores come in 🎾</div>
+    ${courtsHTML}
+  </div>
+  <div class="card">
+    <h2>Standings</h2>
+    <table><thead><tr><th class="rank">#</th><th>Player</th><th class="num">W</th><th class="num active">Pts</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+}
 
 /* ---------- boot ---------- */
-const APP_VERSION = "1.7";
+const APP_VERSION = "1.8";
 render();
 (function(){ var v=document.getElementById("ver"); if(v) v.textContent="v"+APP_VERSION; })();
 loadSupabase();
