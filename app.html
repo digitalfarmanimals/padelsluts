@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0e1116" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Kourt" />
+<meta name="description" content="KOURT — play padel Americano & Mexicano, track stats, climb the national leaderboard and qualify for KOURT KING." />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="apple-touch-icon-180.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+<title>KOURT — Play Padel</title>
+<style>
+  :root{
+    --bg:#0e1116; --card:#181d26; --card2:#1f2632; --line:#2a3340;
+    --txt:#eef2f7; --muted:#8b94a3; --accent:#c8ff32; --accent-d:#a6db18;
+    --cyan:#34e1eb; --danger:#ff5a5f; --gold:#ffd34d;
+    --radius:16px; --shadow:0 10px 34px rgba(0,0,0,.45);
+    --display:'Anton','Arial Narrow','Helvetica Neue',sans-serif;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:radial-gradient(1200px 600px at 50% -10%, #16202b 0%, var(--bg) 55%) fixed;
+    color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.45; padding:env(safe-area-inset-top) 0 64px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:18px 16px}
+  header.app{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
+  .logo{width:48px;height:48px;flex-shrink:0;display:block}
+  .title{font-family:var(--display);font-weight:400;letter-spacing:1px;font-size:40px;line-height:.85;text-transform:uppercase;transform:skewX(-8deg)}
+  .title b{color:var(--accent);font-weight:400}
+  .tag{color:var(--muted);font-size:10.5px;margin-top:6px;text-transform:uppercase;letter-spacing:2px;font-weight:800}
+  .subtitle{font-family:var(--display);font-weight:400;font-size:15px;letter-spacing:7px;text-transform:uppercase;color:var(--accent);margin-top:2px;line-height:1;transform:skewX(-8deg)}
+  .potHead{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+  .potTog{color:var(--muted);font-size:13px;font-weight:800;display:flex;align-items:center;gap:8px}
+  #printArea{display:none}
+  @media print{
+    .wrap{display:none !important}
+    #printArea{display:block !important}
+    body{background:#fff !important;padding:0 !important}
+    @page{margin:14mm}
+  }
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin:14px 0;box-shadow:var(--shadow)}
+  .card h2{margin:0 0 12px;font-family:var(--display);font-weight:400;font-size:21px;letter-spacing:.6px;text-transform:uppercase}
+  .row{display:flex;gap:10px;align-items:center}
+  label.fld{display:block;font-size:12px;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.6px}
+  input,button,select{font-family:inherit;font-size:16px}
+  input[type=text],input[type=number],input[type=email]{
+    width:100%;background:var(--card2);border:1px solid var(--line);color:var(--txt);
+    border-radius:12px;padding:13px 14px;outline:none;transition:border-color .15s,box-shadow .15s;
+  }
+  input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,255,50,.15)}
+  .btn{border:none;border-radius:12px;padding:13px 16px;font-weight:800;cursor:pointer;transition:transform .04s,filter .15s;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-transform:uppercase;letter-spacing:.7px}
+  .btn:active{transform:translateY(1px)}
+  .btn.primary{background:var(--accent);color:#0c1208}
+  .btn.primary:hover{filter:brightness(1.05)}
+  .btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line)}
+  .btn.cyan{background:var(--cyan);color:#03242a}
+  .btn.block{width:100%}
+  .btn.lg{padding:17px;font-size:22px;font-family:var(--display);font-weight:400;letter-spacing:1.5px}
+  .btn.sm{padding:8px 12px;font-size:13px;border-radius:10px}
+  .btn.danger{background:transparent;color:var(--danger);border:1px solid rgba(255,90,95,.4)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{background:var(--card2);border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer}
+  .chip.on{background:var(--accent);color:#0c1208;border-color:var(--accent)}
+  .ranktoggle{display:inline-flex;align-items:center;gap:7px}
+  .ranktoggle .rl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:800;margin-right:2px}
+  .ranktoggle .chip{padding:6px 12px}
+  th.active{color:var(--accent)}
+  td.active{color:var(--accent);font-weight:800}
+  .potbig{font-family:var(--display);font-weight:400;font-size:38px;letter-spacing:.5px;color:var(--gold);margin:2px 0 10px}
+  td.money{color:var(--gold);font-weight:800}
+  .histitem{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line)}
+  .histitem:last-of-type{border-bottom:0}
+  .hi-win{font-weight:700;font-size:15px;margin-bottom:3px}
+  .hi-actions{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+  .welcome .card{max-width:460px;margin:8px auto 0}
+  body.hero{background:
+    linear-gradient(180deg, rgba(8,10,15,.5) 0%, rgba(8,10,15,.72) 45%, rgba(8,10,15,.97) 100%),
+    url('hero.jpg') center 28%/cover no-repeat;}
+  body.hero .welcome{padding-top:8vh}
+  body.hero .welcome .card{background:rgba(14,17,24,.74);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.14);box-shadow:0 22px 60px rgba(0,0,0,.55)}
+  .home-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+  .tile{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px 16px;cursor:pointer;min-height:128px;display:flex;flex-direction:column;justify-content:space-between;transition:transform .05s,border-color .15s;box-shadow:var(--shadow)}
+  .tile:hover{border-color:var(--accent)}
+  .tile:active{transform:translateY(1px)}
+  .tile .ti{font-size:30px;line-height:1}
+  .tile .tic{width:46px;height:46px;border-radius:13px;background:rgba(200,255,50,.12);border:1px solid rgba(200,255,50,.26);display:inline-flex;align-items:center;justify-content:center;color:var(--accent)}
+  .tile .tic svg{width:25px;height:25px;display:block}
+  .tile.soon .tic{background:rgba(255,255,255,.06);border-color:var(--line);color:var(--muted)}
+  .tile .tt{font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:.5px;text-transform:uppercase}
+  .tile .ts{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-top:2px}
+  .tile.soon{opacity:.7}
+  .players{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .ptag{display:inline-flex;align-items:center;gap:8px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:7px 8px 7px 14px;font-weight:700}
+  .ptag .x{width:22px;height:22px;border-radius:50%;background:#2c3543;color:var(--muted);border:none;cursor:pointer;font-size:14px;line-height:1;display:grid;place-items:center}
+  .ptag .x:hover{background:var(--danger);color:#fff}
+  .muted{color:var(--muted)}
+  .small{font-size:12.5px}
+  .err{color:var(--danger);font-size:13px;margin-top:8px;min-height:0}
+  .split{display:flex;gap:12px}
+  .split>div{flex:1}
+  .pill{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--muted)}
+  .progress{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 2px}
+  .bar{height:7px;background:var(--card2);border-radius:999px;overflow:hidden;flex:1}
+  .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--accent));border-radius:999px;transition:width .3s}
+
+  .court{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
+  .court .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .court .ch .name{font-weight:800;letter-spacing:.3px}
+  .court .ch .tag{font-size:11px}
+  .team{display:flex;align-items:center;gap:10px;padding:9px 0}
+  .team .names{flex:1;font-weight:700;font-size:15.5px}
+  .team .names .amp{color:var(--muted);font-weight:600;margin:0 4px}
+  .score{width:72px;text-align:center;font-size:22px;font-weight:800;padding:10px 6px}
+  .vs{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase}
+  .vs:before,.vs:after{content:"";height:1px;background:var(--line);flex:1}
+  .win{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+  .winbadge{color:var(--accent);font-weight:800;font-size:11px;margin-left:8px}
+  .byes{margin-top:10px;font-size:13px;color:var(--muted)}
+  .byes b{color:var(--txt)}
+
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th,td{padding:11px 8px;text-align:left;border-bottom:1px solid var(--line);font-size:14.5px}
+  th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.6px;font-weight:800}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+  tr.me td{}
+  .rank{font-weight:900;width:34px}
+  .top1 td{background:linear-gradient(90deg,rgba(200,255,50,.12),transparent)}
+  .winnerbanner{text-align:center;background:linear-gradient(160deg,#202a16,#181d26);border:1px solid var(--accent-d);border-radius:var(--radius);padding:22px 16px;margin:14px 0}
+  .winnerbanner .crown{font-size:40px}
+  .winnerbanner .wname{font-family:var(--display);font-weight:400;font-size:34px;letter-spacing:1px;text-transform:uppercase;margin:6px 0 2px}
+  .winnerbanner .wstat{color:var(--accent)}
+  .footer{ text-align:center;color:var(--muted);font-size:11.5px;margin-top:20px}
+  .actions{display:flex;gap:10px;margin-top:8px}
+  .actions .btn{flex:1}
+  .stack{display:flex;flex-direction:column;gap:10px}
+  .live th,.live td{padding:7px 8px;font-size:13px}
+  .hr{height:1px;background:var(--line);margin:14px 0;border:0}
+  details summary{cursor:pointer;color:var(--muted);font-size:13px;font-weight:700;list-style:none}
+  details summary::-webkit-details-marker{display:none}
+  details summary:before{content:"▸ ";color:var(--accent)}
+  details[open] summary:before{content:"▾ "}
+  @media (max-width:420px){ .title{font-size:24px} .score{width:62px;font-size:20px} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="app">
+      <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="KOURT"><circle cx="50" cy="50" r="49" fill="#c8ff32"/><text x="50" y="51" text-anchor="middle" dominant-baseline="central" font-family="'Arial Black',Arial,sans-serif" font-weight="900" font-size="66" fill="#0b0e13">K</text></svg>
+      <div>
+        <div class="title"><b>K</b>OURT</div>
+        <div class="subtitle">Padel</div>
+        <div class="tag">Americano &amp; Mexicano · partners shuffled · one winner</div>
+      </div>
+    </header>
+    <div id="app"></div>
+    <div class="footer">Auto-saved on this device · works offline 🟢 · <span id="ver"></span></div>
+  </div>
+  <div id="printArea" aria-hidden="true"></div>
+
+<script>
+"use strict";
+
+/* ---------- state ---------- */
+const KEY = "padelsluts.v1";
+const DEFAULT = { players:[], pointsPerMatch:24, numRounds:5, rounds:[], currentRound:0, phase:"setup", rankBy:"points", mode:"americano", pairing:"smart", buyIn:0, currency:"£", payout:"all", courts:0, liveCode:null };
+let state = load();
+let history = loadHistory();
+let view = null;
+let entered = false;
+let potOpen = false;
+function togglePot(){ potOpen=!potOpen; render(); }
+const EKEY = "padelsluts.email.v1";
+function loadEmail(){ try{ return localStorage.getItem(EKEY)||""; }catch(e){ return ""; } }
+let userEmail = loadEmail();
+function setEmail(v){ userEmail=(v||"").trim(); try{ localStorage.setItem(EKEY, userEmail); }catch(e){} }
+
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if(s && typeof s==="object") return Object.assign({}, DEFAULT, s);
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT));
+}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} if(state.liveCode) pushLive(); }
+
+/* ---------- helpers ---------- */
+function esc(s){ return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+function pName(id){ const p=state.players.find(x=>x.id===id); return p?esc(p.name):"?"; }
+function plural(n,w){ const suf=(n===1)?"":(/(s|x|z|ch|sh)$/.test(w)?"es":"s"); return n+" "+w+suf; }
+
+/* ---------- round generation: Americano (smart/random) + Mexicano ---------- */
+function pairKey(a,b){ return a<b ? a+"|"+b : b+"|"+a; }
+
+// fair byes: players who've sat out least go first to play; ties random
+function pickByes(ids){
+  const byeCount={}; ids.forEach(id=>byeCount[id]=0);
+  state.rounds.forEach(r=> r.byes.forEach(id=>{ if(byeCount[id]!=null) byeCount[id]++; }));
+  const ordered=shuffle(ids).sort((a,b)=> byeCount[a]-byeCount[b]);
+  const maxCourts = state.courts>0 ? state.courts : Infinity;            // 0 = use all courts (auto)
+  const courts = Math.min(maxCourts, Math.floor(ids.length/4));
+  return ordered.slice(0, ids.length - courts*4);                        // everyone over the court limit sits out
+}
+function chunkTeams(arr){
+  const courts=[];
+  for(let i=0;i<arr.length;i+=4) courts.push({ teamA:[arr[i],arr[i+1]], teamB:[arr[i+2],arr[i+3]], scoreA:null, scoreB:null });
+  return courts;
+}
+// how often each pair has partnered / faced off so far
+function historyCounts(){
+  const partner={}, opp={};
+  const bump=(m,a,b)=>{ const k=pairKey(a,b); m[k]=(m[k]||0)+1; };
+  state.rounds.forEach(r=> r.courts.forEach(c=>{
+    bump(partner,c.teamA[0],c.teamA[1]); bump(partner,c.teamB[0],c.teamB[1]);
+    c.teamA.forEach(a=> c.teamB.forEach(b=> bump(opp,a,b)));
+  }));
+  return { partner, opp };
+}
+// lower = fewer repeats; repeat partners punished 10x harder than repeat opponents
+function arrangementCost(courts,partner,opp){
+  let cost=0;
+  courts.forEach(c=>{
+    cost += (partner[pairKey(c.teamA[0],c.teamA[1])]||0)*10;
+    cost += (partner[pairKey(c.teamB[0],c.teamB[1])]||0)*10;
+    c.teamA.forEach(a=> c.teamB.forEach(b=>{ cost += (opp[pairKey(a,b)]||0); }));
+  });
+  return cost;
+}
+// one greedy draw: pair least-used partners, then pit teams with least-faced opponents
+function greedyArrange(playing, partner, opp){
+  const pool=shuffle(playing);
+  const teams=[];
+  while(pool.length){
+    const a=pool.shift();
+    let bi=0, bc=Infinity;
+    for(let i=0;i<pool.length;i++){ const c=partner[pairKey(a,pool[i])]||0; if(c<bc){ bc=c; bi=i; if(c===0) break; } }
+    teams.push([a, pool.splice(bi,1)[0]]);
+  }
+  const tpool=shuffle(teams), courts=[];
+  while(tpool.length){
+    const tA=tpool.shift();
+    let bi=0, bc=Infinity;
+    for(let i=0;i<tpool.length;i++){
+      let c=0; const tB=tpool[i];
+      tA.forEach(x=> tB.forEach(y=>{ c+=(opp[pairKey(x,y)]||0); }));
+      if(c<bc){ bc=c; bi=i; if(c===0) break; }
+    }
+    courts.push({ teamA:tA, teamB:tpool.splice(bi,1)[0], scoreA:null, scoreB:null });
+  }
+  return courts;
+}
+function buildAmericanoRound(){
+  const ids=state.players.map(p=>p.id);
+  const byes=pickByes(ids);
+  const playing=ids.filter(id=> byes.indexOf(id)<0);
+  if(state.pairing==="random" || playing.length<=4) return { courts:chunkTeams(shuffle(playing)), byes };
+  // smart: run many greedy draws, keep the one with fewest repeat partners/opponents
+  const { partner, opp }=historyCounts();
+  let best=null, bestCost=Infinity;
+  const attempts=Math.min(400, Math.max(120, playing.length*12));
+  for(let t=0;t<attempts;t++){
+    const courts=greedyArrange(playing, partner, opp);
+    const cost=arrangementCost(courts,partner,opp);
+    if(cost<bestCost){ bestCost=cost; best=courts; if(cost===0) break; }
+  }
+  return { courts:best, byes };
+}
+function buildMexicanoRound(){
+  const ids=state.players.map(p=>p.id);
+  const byes=pickByes(ids);
+  const playing=new Set(ids.filter(id=> byes.indexOf(id)<0));
+  // rank the playing field by points, then group: 1st+4th vs 2nd+3rd on each court
+  const ranked=computeStandings().slice()
+    .sort((a,b)=> b.points-a.points || b.wins-a.wins || a.name.localeCompare(b.name))
+    .map(p=>p.id).filter(id=> playing.has(id));
+  const courts=[];
+  for(let i=0;i<ranked.length;i+=4){
+    const g=ranked.slice(i,i+4);
+    courts.push({ teamA:[g[0],g[3]], teamB:[g[1],g[2]], scoreA:null, scoreB:null });
+  }
+  return { courts, byes };
+}
+function buildRound(){
+  const played = state.rounds.some(r=> r.courts.some(c=> c.scoreA!=null && c.scoreB!=null));
+  if(state.mode==="mexicano" && played) return buildMexicanoRound();
+  return buildAmericanoRound();
+}
+
+/* ---------- standings ---------- */
+function computeStandings(){
+  const stats={};
+  state.players.forEach(p=> stats[p.id]={id:p.id,name:p.name,wins:0,points:0,played:0,draws:0});
+  state.rounds.forEach(r=> r.courts.forEach(c=>{
+    if(c.scoreA==null||c.scoreB==null) return;
+    const aWin=c.scoreA>c.scoreB, bWin=c.scoreB>c.scoreA;
+    c.teamA.forEach(id=>{ if(stats[id]){ stats[id].points+=c.scoreA; stats[id].played++; if(aWin)stats[id].wins++; else if(!bWin)stats[id].draws++; }});
+    c.teamB.forEach(id=>{ if(stats[id]){ stats[id].points+=c.scoreB; stats[id].played++; if(bWin)stats[id].wins++; else if(!aWin)stats[id].draws++; }});
+  }));
+  const byPoints=(a,b)=> b.points-a.points || b.wins-a.wins || a.name.localeCompare(b.name);
+  const byWins=(a,b)=> b.wins-a.wins || b.points-a.points || a.name.localeCompare(b.name);
+  return Object.values(stats).sort(state.rankBy==="wins"?byWins:byPoints);
+}
+
+/* ---------- actions ---------- */
+function addPlayer(){
+  const inp=document.getElementById("nameInput");
+  const name=(inp.value||"").trim();
+  const err=document.getElementById("setupErr");
+  if(!name){ inp.focus(); return; }
+  if(state.players.some(p=>p.name.toLowerCase()===name.toLowerCase())){ err.textContent="“"+name+"” is already in the list."; return; }
+  state.players.push({id:uid(), name}); err.textContent="";
+  save(); render();
+  const ni=document.getElementById("nameInput"); if(ni){ ni.value=""; ni.focus(); }
+}
+function removePlayer(id){ state.players=state.players.filter(p=>p.id!==id); save(); render(); }
+function setPoints(v){ state.pointsPerMatch=v; save(); render(); }
+function setRounds(v){ state.numRounds=v; save(); render(); }
+function setCourts(v){ state.courts=Math.max(0,v||0); save(); render(); }
+function setMode(m){ state.mode=m; save(); render(); }
+function setPairing(p){ state.pairing=p; save(); render(); }
+function setRankBy(v){ state.rankBy=v; save(); if(state.phase==="play") refreshLive(); else render(); }
+function rankToggleHTML(){
+  const byPts=state.rankBy!=="wins";
+  return `<span class="ranktoggle"><span class="rl">Rank by</span>`+
+    `<span class="chip ${byPts?'on':''}" onclick="setRankBy('points')">Points</span>`+
+    `<span class="chip ${!byPts?'on':''}" onclick="setRankBy('wins')">Wins</span></span>`;
+}
+
+/* ---------- the pot 💸 ---------- */
+function setBuyIn(v){ state.buyIn=Math.max(0, +v||0); save(); render(); }
+function setCurrency(c){ state.currency=c; save(); render(); }
+function setPayout(p){ state.payout=p; save(); render(); }
+function formatMoney(n){ n=Math.round(n*100)/100; return state.currency + (Number.isInteger(n)? n : n.toFixed(2)); }
+function potPayouts(standings){
+  const pot=state.buyIn*state.players.length;
+  const elig=standings.filter(p=>p.played>0);
+  if(!elig.length) return { pot, payouts:[] };
+  const schemes={ all:[100], top2:[60,40], top3:[50,30,20] };
+  const base=schemes[state.payout]||[100];
+  let pct=base.slice(0, Math.min(base.length, elig.length));
+  const sum=pct.reduce((a,b)=>a+b,0);
+  pct=pct.map(x=> x/sum*100);                 // normalise so the whole pot pays out
+  const posPct=elig.map((_,i)=> pct[i]||0);
+  const payouts=[]; let i=0;
+  while(i<elig.length){                        // split prize evenly across any exact ties
+    let j=i;
+    while(j+1<elig.length && elig[j+1].wins===elig[i].wins && elig[j+1].points===elig[i].points) j++;
+    const groupPct=posPct.slice(i,j+1).reduce((a,b)=>a+b,0)/(j-i+1);
+    for(let k=i;k<=j;k++){ if(groupPct>0.0001) payouts.push({ id:elig[k].id, name:elig[k].name, amount: pot*groupPct/100 }); }
+    i=j+1;
+  }
+  return { pot, payouts };
+}
+function potCardHTML(standings, played){
+  const { pot, payouts }=potPayouts(standings);
+  const rows=(played && payouts.length)
+    ? payouts.map(p=>`<tr><td>${esc(p.name)}</td><td class="num money">${formatMoney(p.amount)}</td></tr>`).join("")
+    : `<tr><td class="muted small">Finish the tournament to see who scoops it.</td><td></td></tr>`;
+  return `<div class="card">
+    <h2>💸 The pot</h2>
+    <div class="potbig">${formatMoney(pot)} <span class="small muted" style="font-weight:600">in the pot</span></div>
+    <table><tbody>${rows}</tbody></table>
+  </div>`;
+}
+
+/* ---------- saved games (local history; syncs to the cloud once login lands) ---------- */
+const HKEY="padelsluts.history.v1";
+function loadHistory(){ try{ const h=JSON.parse(localStorage.getItem(HKEY)); return Array.isArray(h)?h:[]; }catch(e){ return []; } }
+function saveHistory(){ try{ localStorage.setItem(HKEY, JSON.stringify(history)); }catch(e){} }
+function currentSummary(){
+  const s=computeStandings();
+  const top=s.some(x=>x.played)?s[0]:null;
+  return {
+    savedAt: Date.now(),
+    players: state.players.length,
+    mode: state.mode==="mexicano"?"Mexicano":"Americano",
+    finished: state.phase==="results",
+    winnerName: top?top.name:null,
+    winnerStat: top?(top.wins+" wins · "+top.points+" pts"):null,
+    pot: state.buyIn>0 ? formatMoney(state.buyIn*state.players.length) : null
+  };
+}
+function archiveCurrent(){
+  if(!state.players || !state.players.length) return;
+  const hasScores=(state.rounds||[]).some(r=>r.courts.some(c=>c.scoreA!=null));
+  if(!hasScores) return;                       // only save games that actually got played
+  if(!state.id) state.id=uid();
+  const entry={ id:state.id, savedAt:Date.now(), summary:currentSummary(), snapshot:JSON.parse(JSON.stringify(state)) };
+  const i=history.findIndex(h=>h.id===state.id);
+  if(i>=0) history[i]=entry; else history.unshift(entry);   // upsert by game id (one entry per game)
+  saveHistory();
+  cloudSaveGame(entry);
+}
+function newGame(keepPlayers){
+  const inProgress = state.phase==="play" && (state.rounds||[]).some(r=>r.courts.some(c=>c.scoreA!=null));
+  if(inProgress && !confirm("Start a new game? This one is saved to your history first.")) return;
+  archiveCurrent();
+  const fresh=JSON.parse(JSON.stringify(DEFAULT));
+  fresh.players = keepPlayers ? state.players.map(p=>({id:p.id,name:p.name})) : [];
+  fresh.pointsPerMatch=state.pointsPerMatch; fresh.numRounds=state.numRounds;
+  fresh.mode=state.mode; fresh.pairing=state.pairing; fresh.rankBy=state.rankBy;
+  fresh.currency=state.currency; fresh.payout=state.payout; fresh.buyIn=state.buyIn; fresh.courts=state.courts;
+  state=fresh; view=null; save(); render(); window.scrollTo(0,0);
+}
+function openFromHistory(id){
+  archiveCurrent();
+  const e=history.find(h=>h.id===id); if(!e) return;
+  state=JSON.parse(JSON.stringify(e.snapshot)); if(!state.id) state.id=e.id;
+  view=null; entered=true; save(); render(); window.scrollTo(0,0);
+}
+function deleteHistoryItem(id){ history=history.filter(h=>h.id!==id); saveHistory(); cloudDeleteGame(id); render(); }
+function clearHistory(){ if(!confirm("Delete all saved games? This can't be undone.")) return; history=[]; saveHistory(); render(); }
+function showHistory(){ view="history"; render(); window.scrollTo(0,0); }
+function hideHistory(){ view=null; render(); window.scrollTo(0,0); }
+function replayFromHistory(id){
+  const e=history.find(h=>h.id===id); if(!e||!e.snapshot) return;
+  const players=(e.snapshot.players||[]).map(p=>({id:uid(),name:p.name}));
+  if(!players.length) return;
+  archiveCurrent();
+  const snap=e.snapshot, fresh=JSON.parse(JSON.stringify(DEFAULT));
+  fresh.players=players;
+  fresh.pointsPerMatch=snap.pointsPerMatch; fresh.numRounds=snap.numRounds;
+  fresh.mode=snap.mode; fresh.pairing=snap.pairing; fresh.rankBy=snap.rankBy;
+  fresh.currency=snap.currency; fresh.payout=snap.payout; fresh.buyIn=snap.buyIn; fresh.courts=snap.courts;
+  state=fresh; view=null; entered=true; save(); render(); window.scrollTo(0,0);
+}
+function exportPDF(){
+  const s=computeStandings();
+  const played=s.some(x=>x.played);
+  const top=s[0]||{wins:0,points:0};
+  const winners=played?s.filter(p=>p.wins===top.wins&&p.points===top.points):[];
+  const medals=["🥇","🥈","🥉"];
+  const d=new Date();
+  const date=d.toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'});
+  const rows=s.map((p,i)=>`<tr>
+    <td style="padding:8px 6px;border-bottom:1px solid #ddd;font-weight:700">${played&&i<3?medals[i]:(i+1)}</td>
+    <td style="padding:8px 6px;border-bottom:1px solid #ddd">${esc(p.name)}</td>
+    <td style="padding:8px 6px;border-bottom:1px solid #ddd;text-align:right">${p.played}</td>
+    <td style="padding:8px 6px;border-bottom:1px solid #ddd;text-align:right">${p.wins}</td>
+    <td style="padding:8px 6px;border-bottom:1px solid #ddd;text-align:right;font-weight:800">${p.points}</td>
+  </tr>`).join("");
+  let potHTML="";
+  if(state.buyIn>0){
+    const pp=potPayouts(s);
+    potHTML=`<h3 style="margin:20px 0 6px">The pot — ${formatMoney(pp.pot)}</h3>`+
+      (pp.payouts.length?`<table style="width:100%;border-collapse:collapse">${pp.payouts.map(p=>`<tr><td style="padding:5px 6px">${esc(p.name)}</td><td style="padding:5px 6px;text-align:right;font-weight:800">${formatMoney(p.amount)}</td></tr>`).join("")}</table>`:"");
+  }
+  const champ=played
+    ? `<div style="font-size:24px;font-weight:900;margin:10px 0 2px">👑 ${winners.map(w=>esc(w.name)).join(" &amp; ")}</div><div style="color:#555">${winners.length>1?"Tied champions":"Champion"} · ${plural(top.wins,"win")} · ${top.points} points</div>`
+    : `<div style="color:#555">No scores recorded.</div>`;
+  document.getElementById('printArea').innerHTML=`
+    <div style="font-family:Arial,Helvetica,sans-serif;color:#111;max-width:680px;margin:0 auto;padding:28px">
+      <div style="display:flex;align-items:center;gap:10px;border-bottom:3px solid #111;padding-bottom:10px">
+        <div style="width:40px;height:40px;border-radius:50%;background:#c8ff32;display:flex;align-items:center;justify-content:center;font-family:'Arial Black',Arial;font-weight:900;font-size:26px;color:#0b0e13">K</div>
+        <div style="font-size:28px;font-weight:900;letter-spacing:1px">KOURT <span style="font-weight:700;color:#777;font-size:15px;letter-spacing:3px">PADEL</span></div>
+      </div>
+      <h2 style="margin:16px 0 2px;text-transform:uppercase;letter-spacing:1px">Final Results</h2>
+      <div style="color:#666;margin-bottom:10px">${state.mode==='mexicano'?'Mexicano':'Americano'} · ${date}</div>
+      ${champ}
+      <table style="width:100%;border-collapse:collapse;margin-top:18px">
+        <thead><tr>
+          <th style="text-align:left;padding:6px;border-bottom:2px solid #111">#</th>
+          <th style="text-align:left;padding:6px;border-bottom:2px solid #111">Player</th>
+          <th style="text-align:right;padding:6px;border-bottom:2px solid #111">Played</th>
+          <th style="text-align:right;padding:6px;border-bottom:2px solid #111">Wins</th>
+          <th style="text-align:right;padding:6px;border-bottom:2px solid #111">Points</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      ${potHTML}
+      <div style="margin-top:26px;color:#999;font-size:12px;text-align:center">Generated by KOURT Padel</div>
+    </div>`;
+  window.print();
+}
+
+/* ---------- league / stats (local; same engine powers global later) ---------- */
+function standingsOf(snap){
+  const stats={};
+  (snap.players||[]).forEach(p=>{ stats[p.id]={id:p.id,name:p.name,wins:0,points:0,played:0}; });
+  (snap.rounds||[]).forEach(r=>(r.courts||[]).forEach(c=>{
+    if(c.scoreA==null||c.scoreB==null) return;
+    const aWin=c.scoreA>c.scoreB,bWin=c.scoreB>c.scoreA;
+    c.teamA.forEach(id=>{ if(stats[id]){stats[id].points+=c.scoreA;stats[id].played++;if(aWin)stats[id].wins++;} });
+    c.teamB.forEach(id=>{ if(stats[id]){stats[id].points+=c.scoreB;stats[id].played++;if(bWin)stats[id].wins++;} });
+  }));
+  return Object.values(stats).sort((a,b)=> snap.rankBy==="wins" ? (b.wins-a.wins||b.points-a.points) : (b.points-a.points||b.wins-a.wins));
+}
+function leagueStats(){
+  const P={}, pairs={};
+  const pl=(name)=>{ const k=name.toLowerCase(); if(!P[k])P[k]={name,tournaments:0,matches:0,wins:0,points:0,titles:0}; P[k].name=name; return P[k]; };
+  const addPair=(team,won,score)=>{ if(team.length<2)return; const k=[team[0].toLowerCase(),team[1].toLowerCase()].sort().join('|');
+    if(!pairs[k])pairs[k]={a:team[0],b:team[1],games:0,wins:0,points:0}; const pr=pairs[k]; pr.a=team[0];pr.b=team[1];pr.games++;pr.points+=score;if(won)pr.wins++; };
+  (history||[]).forEach(e=>{
+    const snap=e.snapshot; if(!snap) return;
+    const nameById={}; (snap.players||[]).forEach(p=>nameById[p.id]=p.name);
+    const seen=new Set();
+    (snap.rounds||[]).forEach(r=>(r.courts||[]).forEach(c=>{
+      if(c.scoreA==null||c.scoreB==null) return;
+      const aWin=c.scoreA>c.scoreB,bWin=c.scoreB>c.scoreA;
+      const tA=c.teamA.map(id=>nameById[id]).filter(Boolean), tB=c.teamB.map(id=>nameById[id]).filter(Boolean);
+      tA.forEach(n=>{const x=pl(n);x.matches++;x.points+=c.scoreA;if(aWin)x.wins++;seen.add(n.toLowerCase());});
+      tB.forEach(n=>{const x=pl(n);x.matches++;x.points+=c.scoreB;if(bWin)x.wins++;seen.add(n.toLowerCase());});
+      addPair(tA,aWin,c.scoreA); addPair(tB,bWin,c.scoreB);
+    }));
+    seen.forEach(k=>{ if(P[k])P[k].tournaments++; });
+    const st=standingsOf(snap).filter(p=>p.played>0);
+    if(st.length){ const t=st[0]; st.filter(p=>p.wins===t.wins&&p.points===t.points).forEach(w=>pl(w.name).titles++); }
+  });
+  const players=Object.values(P).map(p=>({...p, lp:p.wins*3+p.titles*15, winrate:p.matches?Math.round(p.wins/p.matches*100):0}))
+    .sort((a,b)=> b.lp-a.lp || b.points-a.points || b.winrate-a.winrate || a.name.localeCompare(b.name));
+  const duos=Object.values(pairs).map(d=>({...d, winrate:d.games?Math.round(d.wins/d.games*100):0}))
+    .filter(d=>d.games>=2).sort((a,b)=> b.wins-a.wins || b.winrate-a.winrate || b.points-a.points).slice(0,8);
+  return { players, duos };
+}
+function leagueHTML(){
+  const {players,duos}=leagueStats();
+  const back=`<button class="btn ghost sm" onclick="hideLeague()">← Back</button>`;
+  if(!players.length) return `<div class="card"><div class="ch" style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">🏆 League</h2>${back}</div><div class="muted" style="padding:10px 0">Play and save some games — your league table builds automatically.</div></div>`;
+  const medals=["🥇","🥈","🥉"];
+  const rows=players.map((p,i)=>`<tr class="${i===0?'top1':''}"><td class="rank">${i<3?medals[i]:(i+1)}</td><td>${esc(p.name)}</td><td class="num">${p.wins}</td><td class="num">${p.titles?('🏆'+p.titles):'–'}</td><td class="num active">${p.lp}</td></tr>`).join("");
+  const duoRows=duos.length?duos.map((d,i)=>`<tr><td class="rank">${i+1}</td><td>${esc(d.a)} <span class="amp">+</span> ${esc(d.b)}</td><td class="num">${d.wins}/${d.games}</td><td class="num active">${d.winrate}%</td></tr>`).join("")
+    :`<tr><td class="muted small" colspan="4">Play a few more games to surface your best partnerships.</td></tr>`;
+  return `
+  <div class="card">
+    <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h2 style="margin:0">🏆 League</h2>${back}</div>
+    <div class="small muted" style="margin-bottom:10px">Lifetime rankings across your saved games · PTS = wins×3 + titles×15</div>
+    <table><thead><tr><th class="rank">#</th><th>Player</th><th class="num">W</th><th class="num">🏆</th><th class="num active">PTS</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>
+  <div class="card">
+    <h2>🤝 Best partnerships</h2>
+    <div class="small muted" style="margin-bottom:10px">Who wins most together — find your perfect partner.</div>
+    <table><thead><tr><th class="rank">#</th><th>Duo</th><th class="num">Won</th><th class="num active">Win%</th></tr></thead><tbody>${duoRows}</tbody></table>
+  </div>`;
+}
+function showLeague(){ view="league"; render(); window.scrollTo(0,0); }
+function hideLeague(){ view=null; render(); window.scrollTo(0,0); }
+
+/* ---------- welcome / front door ---------- */
+function startNewGame(){ entered=true; newGame(false); }
+function resumeGame(){ entered=true; view=null; render(); window.scrollTo(0,0); }
+function welcomeHTML(){
+  const greet = userEmail ? "Welcome back 👋" : "Welcome to KOURT 👋";
+  const params = new URLSearchParams(location.search);
+  const invited = params.get("invite"), liveJoin = params.get("live");
+  const inviteBanner = (invited||liveJoin) ? `<div class="card" style="max-width:460px;margin:0 auto 12px;border-color:var(--accent);background:rgba(200,255,50,.10)"><div style="font-weight:800">${liveJoin?'🔴 Join the LIVE game!':'🎾 You\'ve been invited to KOURT!'}</div><div class="small muted" style="margin-top:2px">Sign in below to ${liveJoin?'watch it live':'join your crew'}.</div></div>` : "";
+  return `
+  <div class="welcome">
+    ${inviteBanner}
+    <div class="card">
+      <h2 style="margin:0 0 4px">${greet}</h2>
+      <p class="small muted" style="margin:0 0 16px">Padel tournaments, leagues &amp; stats. Climb the leaderboard and qualify for <b style="color:var(--accent)">KOURT KING</b>.</p>
+      <label class="fld">Your email</label>
+      <input id="emailInput" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" value="${esc(userEmail)}" onchange="setEmail(this.value)" />
+      <button class="btn primary block lg" style="margin-top:14px" onclick="setEmail(document.getElementById('emailInput').value); sendMagicLink(document.getElementById('emailInput').value)">✉️ Email me a sign-in link</button>
+      ${authMsg?`<div class="small" style="margin-top:12px;font-weight:700;color:${/Check|Sent|Sending|✉️/.test(authMsg)?'var(--accent)':'var(--danger)'}">${esc(authMsg)}</div>`:""}
+      <div class="small muted" style="margin-top:14px">We'll email you a secure sign-in link — no password. Your games, league &amp; stats sync to your account across devices.</div>
+    </div>
+    <div class="small muted" style="text-align:center;margin-top:16px"><a href="/" style="color:var(--accent);font-weight:800;text-decoration:none;letter-spacing:.5px">👑 WHAT'S KOURT KING? →</a></div>
+  </div>`;
+}
+
+/* ---------- home dashboard + sections ---------- */
+function enterHome(){ entered=true; view="home"; render(); window.scrollTo(0,0); }
+function goHome(){ entered=true; view="home"; render(); window.scrollTo(0,0); }
+function goView(v){ entered=true; view=v; render(); window.scrollTo(0,0); }
+function goPlay(){
+  entered=true; view=null;
+  if(state.phase==="results"){ newGame(false); return; }   // fresh setup from a finished game
+  render(); window.scrollTo(0,0);                            // setup to configure, or resume in-progress play
+}
+function homeHTML(){
+  const inProg = state.phase==="play" && (state.rounds||[]).some(r=>r.courts.some(c=>c.scoreA!=null));
+  const ICONS={
+    play:'<ellipse cx="10" cy="9" rx="5.6" ry="6.6"/><path d="M10 15.6V20.6"/><path d="M8.3 20.6h3.4"/><circle cx="18.2" cy="6.4" r="1.7"/>',
+    stats:'<path d="M5 20.5v-5"/><path d="M12 20.5v-10"/><path d="M19 20.5v-14"/>',
+    friends:'<circle cx="8.6" cy="8" r="3.1"/><circle cx="16.4" cy="9" r="2.5"/><path d="M3.2 20c0-3 2.4-4.8 5.4-4.8 1.7 0 3.2.6 4.1 1.7"/><path d="M14.8 14.6c2.6 0 4.4 1.8 4.4 4.4"/>',
+    events:'<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17"/><path d="M8 3v4"/><path d="M16 3v4"/><circle cx="12" cy="15" r="1.7" fill="currentColor" stroke="none"/>'
+  };
+  const ic=(k)=>`<span class="tic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg></span>`;
+  const t=(onclick,k,title,sub,soon)=>`<div class="tile${soon?' soon':''}" onclick="${onclick}">${ic(k)}<div><div class="tt">${title}</div><div class="ts">${sub}</div></div></div>`;
+  const resume = inProg ? `<div class="card" onclick="goPlay()" style="cursor:pointer;border-color:var(--accent);display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div><div style="font-weight:800">▶ Resume your game</div><div class="small muted">Round ${state.currentRound+1} of ${state.numRounds} · ${state.players.length} players</div></div>
+      <span style="color:var(--accent);font-size:22px">→</span></div>` : "";
+  const authBar = authUser ? `<div class="small muted" style="text-align:right;margin-bottom:8px">✅ Signed in as ${esc(authUser.email||"you")} · <span onclick="signOut()" style="color:var(--cyan);cursor:pointer;font-weight:700">Sign out</span></div>` : "";
+  return `
+  ${authBar}
+  ${resume}
+  <div class="home-grid">
+    ${t('goPlay()','play', inProg?'Resume':'Play', inProg?('Round '+(state.currentRound+1)+' of '+state.numRounds):'Americano · Mexicano', false)}
+    ${t("goView('stats')",'stats','Stats','League · history · wins', false)}
+    ${t("goView('friends')",'friends','Friends','Partner finder · invite', false)}
+    ${t("goView('events')",'events','Events','Parties &amp; socials · soon', true)}
+  </div>
+  <a href="/" class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;text-decoration:none;color:inherit;border-color:var(--accent);background:rgba(200,255,50,.06)">
+    <div><div style="font-weight:800">👑 KOURT KING</div><div class="small muted">The nationwide padel league — grassroots → glory</div></div>
+    <span style="color:var(--accent);font-size:22px">→</span>
+  </a>`;
+}
+function statsHTML(){
+  const {players}=leagueStats();
+  const back=`<button class="btn ghost sm" onclick="goHome()">← Home</button>`;
+  const head=(title)=>`<div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="margin:0">${title}</h2>${back}</div>`;
+  if(!players.length) return `<div class="card">${head('📊 Stats')}<div class="muted" style="padding:6px 0 12px">Play and save some games — your league and stats build automatically.</div><button class="btn ghost block" onclick="showHistory()">📋 Game history (${history.length})</button></div>`;
+  const medals=["🥇","🥈","🥉"];
+  const rows=players.map((p,i)=>`<tr class="${i===0?'top1':''}"><td class="rank">${i<3?medals[i]:(i+1)}</td><td>${esc(p.name)}</td><td class="num">${p.wins}</td><td class="num">${p.titles?('🏆'+p.titles):'–'}</td><td class="num active">${p.lp}</td></tr>`).join("");
+  return `
+  <div class="card">
+    ${head('🏆 League')}
+    <div class="small muted" style="margin-bottom:10px">Lifetime rankings across your games · PTS = wins×3 + titles×15</div>
+    <table><thead><tr><th class="rank">#</th><th>Player</th><th class="num">W</th><th class="num">🏆</th><th class="num active">PTS</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>
+  <div class="card"><button class="btn ghost block" onclick="showHistory()">📋 Game history (${history.length})</button></div>`;
+}
+function friendsHTML(){
+  const {duos}=leagueStats();
+  const duoRows=duos.length?duos.map((d,i)=>`<tr><td class="rank">${i+1}</td><td>${esc(d.a)} <span class="amp">+</span> ${esc(d.b)}</td><td class="num">${d.wins}/${d.games}</td><td class="num active">${d.winrate}%</td></tr>`).join("")
+    :`<tr><td class="muted small" colspan="4">Play a few games — your best partnerships surface here.</td></tr>`;
+  return `
+  <div class="card">
+    <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h2 style="margin:0">🤝 Partner finder</h2><button class="btn ghost sm" onclick="goHome()">← Home</button></div>
+    <div class="small muted" style="margin-bottom:10px">Who wins most together — find your perfect partner.</div>
+    <table><thead><tr><th class="rank">#</th><th>Duo</th><th class="num">Won</th><th class="num active">Win%</th></tr></thead><tbody>${duoRows}</tbody></table>
+  </div>
+  <div class="card">
+    <h2>📨 Invite your crew</h2>
+    <div class="muted small" style="margin:4px 0 10px">Email them a sign-in link, or share an invite link anywhere (WhatsApp, etc.).</div>
+    <div class="row">
+      <input id="inviteEmail" type="email" inputmode="email" autocomplete="off" placeholder="their@email.com" />
+      <button class="btn primary" onclick="sendMagicLink(document.getElementById('inviteEmail').value)">Invite</button>
+    </div>
+    <button class="btn ghost block" style="margin-top:10px" onclick="createInviteLink()">🔗 Create &amp; share invite link</button>
+    <button class="btn ghost block" style="margin-top:8px" onclick="toggleInviteQR()">📷 ${showQR?'Hide':'Show'} QR code</button>
+    ${showQR ? (window.qrcode ? `<div style="text-align:center;margin-top:12px"><img src="${inviteQRDataUrl()}" alt="Invite QR code" style="width:210px;height:210px;border-radius:14px;background:#fff;padding:10px"/><div class="small muted" style="margin-top:6px">Scan to join KOURT 🎾</div></div>` : `<div class="small muted" style="text-align:center;margin-top:12px">Loading QR…</div>`) : ""}
+    ${authMsg?`<div class="small" style="margin-top:10px;font-weight:700;color:${/Check|Sent|Sending|✉️|copied|🔗/.test(authMsg)?'var(--accent)':'var(--danger)'}">${esc(authMsg)}</div>`:""}
+  </div>`;
+}
+function eventsHTML(){
+  return `<div class="card">
+    <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h2 style="margin:0">🎉 Events</h2><button class="btn ghost sm" onclick="goHome()">← Home</button></div>
+    <div style="text-align:center;padding:18px 6px">
+      <div style="font-size:44px">🎉</div>
+      <div style="font-family:var(--display);font-size:24px;text-transform:uppercase;letter-spacing:1px;margin-top:6px">KOURT Events</div>
+      <p class="muted" style="max-width:360px;margin:8px auto 0">Plan padel socials &amp; parties — invite the crew by email, set the format, host the whole experience. Lands after the core app is live.</p>
+    </div>
+  </div>`;
+}
+function historyHTML(){
+  const items=history.slice().sort((a,b)=>b.savedAt-a.savedAt);
+  const list = items.length ? items.map(e=>{
+    const s=e.summary||{}; const d=new Date(e.savedAt);
+    const date=d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+' · '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+    const win = s.winnerName ? `👑 ${esc(s.winnerName)} <span class="muted" style="font-weight:600">${s.winnerStat||''}</span>` : `<span class="muted">no scores yet</span>`;
+    const tags = `${s.players||0} players · ${s.mode||'Americano'}${s.finished?'':' · in progress'}${s.pot?` · 💸 ${s.pot}`:''}`;
+    return `<div class="histitem">
+      <div class="hi-main">
+        <div class="hi-win">${win}</div>
+        <div class="small muted">${tags}</div>
+        <div class="small muted">${date}</div>
+      </div>
+      <div class="hi-actions">
+        <button class="btn cyan sm" onclick="replayFromHistory('${e.id}')">♻️ Replay</button>
+        <button class="btn ghost sm" onclick="openFromHistory('${e.id}')">Open</button>
+        <button class="btn danger sm" onclick="deleteHistoryItem('${e.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join("") : `<div class="muted" style="padding:10px 0">No saved games yet. Finish a tournament and it lands here automatically.</div>`;
+  return `<div class="card">
+    <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <h2 style="margin:0">📋 Saved games</h2>
+      <button class="btn ghost sm" onclick="hideHistory()">← Back</button>
+    </div>
+    ${list}
+    ${items.length?`<hr class="hr" /><button class="btn danger sm" onclick="clearHistory()">Clear all saved games</button>`:''}
+  </div>`;
+}
+
+function startTournament(){
+  const err=document.getElementById("setupErr");
+  const pts=Math.max(2, Math.round(+document.getElementById("pointsInput").value||0));
+  const rnd=Math.max(1, Math.round(+document.getElementById("roundsInput").value||0));
+  const ci=document.getElementById("courtsInput"); const cts=ci?Math.max(0,Math.round(+ci.value||0)):state.courts;
+  if(state.players.length<4){ err.textContent="Add at least 4 players to start a padel match (4 per court)."; return; }
+  archiveCurrent();
+  state.pointsPerMatch=pts; state.numRounds=rnd; state.courts=cts;
+  state.id=uid(); state.rounds=[]; state.rounds.push(buildRound()); state.currentRound=0; state.phase="play";
+  save(); render(); window.scrollTo(0,0);
+}
+
+function onScoreInput(el){
+  const r=+el.dataset.round, c=+el.dataset.court, team=el.dataset.team;
+  const court=state.rounds[r].courts[c];
+  const raw=el.value.trim();
+  if(raw===""){ court.scoreA=null; court.scoreB=null; }
+  else{
+    let n=Math.round(+raw); if(isNaN(n))n=0;
+    n=Math.max(0, Math.min(state.pointsPerMatch, n));
+    if(team==="A"){ court.scoreA=n; court.scoreB=state.pointsPerMatch-n; }
+    else{ court.scoreB=n; court.scoreA=state.pointsPerMatch-n; }
+  }
+  save(); refreshScoreInputs(r,c); refreshLive(); refreshCourtWin(r,c);
+}
+function refreshScoreInputs(r,c){
+  const court=state.rounds[r].courts[c];
+  document.querySelectorAll('input[data-round="'+r+'"][data-court="'+c+'"]').forEach(inp=>{
+    if(inp===document.activeElement) return;
+    const v = inp.dataset.team==="A" ? court.scoreA : court.scoreB;
+    inp.value = v==null ? "" : v;
+  });
+}
+function refreshCourtWin(r,c){
+  const court=state.rounds[r].courts[c];
+  const card=document.getElementById("court-"+r+"-"+c); if(!card) return;
+  const a=card.querySelector('[data-side="A"]'), b=card.querySelector('[data-side="B"]');
+  [a,b].forEach(x=>{ if(x){ x.classList.remove("win"); const wb=x.querySelector(".winbadge"); if(wb) wb.remove(); }});
+  if(court.scoreA==null||court.scoreB==null) return;
+  if(court.scoreA>court.scoreB) markWin(a);
+  else if(court.scoreB>court.scoreA) markWin(b);
+}
+function markWin(el){ if(!el) return; el.classList.add("win"); const n=el.querySelector(".names"); if(n && !n.querySelector(".winbadge")){ const s=document.createElement("span"); s.className="winbadge"; s.textContent="WON"; n.appendChild(s);} }
+
+function scoredStatus(){
+  const r=state.rounds[state.currentRound];
+  const done=r.courts.filter(c=>c.scoreA!=null&&c.scoreB!=null).length;
+  return done+" of "+plural(r.courts.length,"match")+" scored";
+}
+function refreshLive(){
+  const live=document.getElementById("livePanel"); if(live) live.innerHTML=liveTableHTML();
+  const st=document.getElementById("scoreStatus"); if(st) st.textContent=scoredStatus();
+}
+
+function nextRound(){
+  if(state.currentRound < state.numRounds-1){
+    if(!state.rounds[state.currentRound+1]) state.rounds.push(buildRound());
+    state.currentRound++; save(); render(); window.scrollTo(0,0);
+  } else { finish(); }
+}
+function prevRound(){ if(state.currentRound>0){ state.currentRound--; save(); render(); window.scrollTo(0,0);} }
+function reshuffle(){
+  const ri=state.currentRound;
+  state.rounds.splice(ri,1);              // drop current so it doesn't count as its own history
+  state.rounds.splice(ri,0,buildRound());
+  save(); render();
+}
+function finish(){ state.phase="results"; archiveCurrent(); save(); render(); window.scrollTo(0,0); }
+function backToPlay(){ state.phase="play"; save(); render(); window.scrollTo(0,0); }
+
+function addAnotherRound(){
+  state.numRounds += 1;
+  state.rounds.push(buildRound());
+  state.currentRound = state.rounds.length-1;
+  state.phase="play"; save(); render(); window.scrollTo(0,0);
+}
+function newKeepPlayers(){
+  state.rounds=[]; state.currentRound=0; state.phase="setup"; save(); render(); window.scrollTo(0,0);
+}
+function resetAll(){
+  if(!confirm("Clear everything — players, scores, the lot?")) return;
+  state=JSON.parse(JSON.stringify(DEFAULT)); save(); render(); window.scrollTo(0,0);
+}
+
+/* ---------- render ---------- */
+function render(){
+  const app=document.getElementById("app");
+  document.body.classList.toggle("hero", authReady && !authUser);
+  if(!authReady){ app.innerHTML=`<div class="welcome"><div class="card" style="text-align:center"><div class="small muted" style="padding:10px 0">Loading…</div></div></div>`; return; }
+  if(!authUser){ app.innerHTML=welcomeHTML(); return; }      // must sign in with email to enter
+  if(liveView){ app.innerHTML=liveScoreboardHTML(); return; }   // viewer watching a live game
+  if(view==="history"){ app.innerHTML=historyHTML(); return; }
+  if(view==="league"){ app.innerHTML=leagueHTML(); return; }
+  if(view==="stats"){ app.innerHTML=statsHTML(); return; }
+  if(view==="friends"){ app.innerHTML=friendsHTML(); return; }
+  if(view==="events"){ app.innerHTML=eventsHTML(); return; }
+  if(view==="home"){ app.innerHTML=homeHTML(); return; }
+  if(state.phase==="setup") app.innerHTML=setupHTML();
+  else if(state.phase==="play") app.innerHTML=playHTML();
+  else app.innerHTML=resultsHTML();
+}
+
+function setupHTML(){
+  const ptsPresets=[16,21,24,32], rndPresets=[3,5,7,9];
+  const playersHTML = state.players.length
+    ? state.players.map(p=>`<span class="ptag">${esc(p.name)}<button class="x" onclick="removePlayer('${p.id}')" aria-label="remove">×</button></span>`).join("")
+    : `<span class="muted small">No players yet — add your crew above.</span>`;
+  const maxC = state.courts>0 ? state.courts : Infinity;
+  const courts = Math.min(maxC, Math.floor(state.players.length/4));
+  const sitting = state.players.length - courts*4;
+  const courtsHint = state.players.length>=4 ? ` <b>${state.players.length}</b> players → <b>${plural(courts,"court")}</b>, <b>${sitting}</b> sit out.` : "";
+  let plan = state.players.length<4
+    ? `<span class="muted">Add at least 4 players (4 per court).</span>`
+    : `<b>${plural(courts,"court")}</b> per round` + (sitting>0? ` · <b>${sitting}</b> sit out & rotate each round`:` · everyone plays every round 🎉`);
+
+  return `
+  <div class="actions" style="margin-bottom:4px"><button class="btn ghost sm" onclick="goHome()">← Home</button></div>
+  <div class="card">
+    <h2>1 · Players <span class="pill" style="float:right">${state.players.length}</span></h2>
+    <div class="row">
+      <input id="nameInput" type="text" placeholder="Player name…" autocomplete="off"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();addPlayer();}" />
+      <button class="btn primary" onclick="addPlayer()">Add</button>
+    </div>
+    <div class="players">${playersHTML}</div>
+    <div id="setupErr" class="err"></div>
+  </div>
+
+  <div class="card">
+    <h2>2 · Format</h2>
+    <label class="fld">Tournament type</label>
+    <div class="chips" style="margin-bottom:6px">
+      <span class="chip ${state.mode!=='mexicano'?'on':''}" onclick="setMode('americano')">🎾 Americano</span>
+      <span class="chip ${state.mode==='mexicano'?'on':''}" onclick="setMode('mexicano')">🇲🇽 Mexicano</span>
+    </div>
+    <div class="small muted" style="margin-bottom:14px">${state.mode==='mexicano'
+      ? '<b>Mexicano</b> — partners &amp; opponents are set by the live leaderboard each round (winners play winners). Stays competitive right to the end.'
+      : '<b>Americano</b> — random partners every round, so everyone plays with and against everyone.'}</div>
+    <div class="split">
+      <div>
+        <label class="fld">Points per match</label>
+        <input id="pointsInput" type="number" inputmode="numeric" min="2" value="${state.pointsPerMatch}"
+          onchange="setPoints(Math.max(2,Math.round(+this.value||0)))" />
+        <div class="chips">${ptsPresets.map(v=>`<span class="chip ${state.pointsPerMatch===v?'on':''}" onclick="setPoints(${v})">${v}</span>`).join("")}</div>
+        <div class="small muted" style="margin-top:8px">Each match plays to this total. Winner takes the bigger share.</div>
+      </div>
+      <div>
+        <label class="fld">Number of rounds</label>
+        <input id="roundsInput" type="number" inputmode="numeric" min="1" value="${state.numRounds}"
+          onchange="setRounds(Math.max(1,Math.round(+this.value||0)))" />
+        <div class="chips">${rndPresets.map(v=>`<span class="chip ${state.numRounds===v?'on':''}" onclick="setRounds(${v})">${v}</span>`).join("")}</div>
+        <div class="small muted" style="margin-top:8px">${plan}</div>
+      </div>
+    </div>
+    <hr class="hr" />
+    <label class="fld">Courts available</label>
+    <input id="courtsInput" type="number" inputmode="numeric" min="0" placeholder="All courts" value="${state.courts||''}"
+      onchange="setCourts(Math.max(0,Math.round(+this.value||0)))" style="max-width:170px" />
+    <div class="chips" style="margin-top:8px">
+      <span class="chip ${!state.courts?'on':''}" onclick="setCourts(0)">All</span>
+      ${[1,2,3,4].map(v=>`<span class="chip ${state.courts===v?'on':''}" onclick="setCourts(${v})">${v}</span>`).join("")}
+    </div>
+    <div class="small muted" style="margin-top:8px">How many courts you've got — extra players sit out &amp; rotate fairly.${courtsHint}</div>
+    ${state.mode!=='mexicano' ? `<hr class="hr" />
+    <label class="fld">Pairing</label>
+    <div class="chips">
+      <span class="chip ${state.pairing!=='random'?'on':''}" onclick="setPairing('smart')">Smart</span>
+      <span class="chip ${state.pairing==='random'?'on':''}" onclick="setPairing('random')">Random</span>
+    </div>
+    <div class="small muted" style="margin-top:8px">${state.pairing==='random' ? 'Pure luck of the draw each round.' : 'Avoids repeat partners for as long as possible, so the mix stays fresh.'}</div>` : ''}
+    <hr class="hr" />
+    <label class="fld">Final ranking</label>
+    ${rankToggleHTML()}
+    <div class="small muted" style="margin-top:8px">Total points is the fairest default when partners are random. Switch to wins if you'd rather.</div>
+    <hr class="hr" />
+    <div class="potHead" onclick="togglePot()">
+      <label class="fld" style="margin:0;cursor:pointer">Pot 💸 — optional</label>
+      <span class="potTog">${(!potOpen && state.buyIn>0)?`<span class="pill">${formatMoney(state.buyIn)} buy-in</span>`:''}${potOpen?'▾':'▸'}</span>
+    </div>
+    ${potOpen?`
+    <div style="margin-top:12px">
+      <div class="row">
+        <input id="buyInInput" type="number" inputmode="decimal" min="0" placeholder="Buy-in per player" value="${state.buyIn||''}" onchange="setBuyIn(this.value)" />
+        <div class="chips">${['£','$','€'].map(c=>`<span class="chip ${state.currency===c?'on':''}" onclick="setCurrency('${c}')">${c}</span>`).join('')}</div>
+      </div>
+      ${state.buyIn>0?`<div class="chips" style="margin-top:10px">
+        <span class="chip ${state.payout==='all'?'on':''}" onclick="setPayout('all')">Winner takes all</span>
+        <span class="chip ${state.payout==='top2'?'on':''}" onclick="setPayout('top2')">Top 2 split</span>
+        <span class="chip ${state.payout==='top3'?'on':''}" onclick="setPayout('top3')">Top 3 split</span>
+      </div>
+      <div class="small muted" style="margin-top:8px">💰 Total pot: <b>${formatMoney(state.buyIn*state.players.length)}</b> — ${state.players.length} × ${formatMoney(state.buyIn)} each.</div>`
+      :`<div class="small muted" style="margin-top:8px">Add a buy-in to track the prize pot and who takes it home.</div>`}
+    </div>`:''}
+  </div>
+
+  <button class="btn primary block lg" onclick="startTournament()">Start tournament 🚀</button>
+  ${history.length? `<button class="btn ghost block" style="margin-top:10px" onclick="showHistory()">📋 Saved games (${history.length})</button>`:""}
+  ${state.players.length? `<div class="actions"><button class="btn danger" onclick="resetAll()">Clear all</button></div>`:""}
+  `;
+}
+
+function teamRowHTML(r,c,side,ids,score){
+  const names=`${pName(ids[0])}<span class="amp">+</span>${pName(ids[1])}`;
+  return `<div class="team" data-side="${side}">
+      <div class="names">${names}</div>
+      <input class="score" type="number" inputmode="numeric" min="0" max="${state.pointsPerMatch}"
+        data-round="${r}" data-court="${c}" data-team="${side}"
+        value="${score==null?'':score}" placeholder="–" oninput="onScoreInput(this)" />
+    </div>`;
+}
+
+function courtHTML(r,ci,court){
+  return `<div class="court" id="court-${r}-${ci}">
+    <div class="ch"><span class="name">🏟️ Court ${ci+1}</span><span class="pill tag">to ${state.pointsPerMatch}</span></div>
+    ${teamRowHTML(r,ci,"A",court.teamA,court.scoreA)}
+    <div class="vs">vs</div>
+    ${teamRowHTML(r,ci,"B",court.teamB,court.scoreB)}
+  </div>`;
+}
+
+function playHTML(){
+  const ri=state.currentRound, round=state.rounds[ri];
+  const pct=Math.round(((ri+1)/state.numRounds)*100);
+  const courtsHTML=round.courts.map((c,ci)=>courtHTML(ri,ci,c)).join("");
+  const byesHTML=round.byes.length
+    ? `<div class="byes">😴 Sitting out: <b>${round.byes.map(pName).join(", ")}</b></div>` : "";
+  const isLast = ri===state.numRounds-1;
+
+  return `
+  <div class="card">
+    <div class="progress">
+      <span><span class="pill">Round ${ri+1} / ${state.numRounds}</span> <span class="pill">${state.mode==='mexicano'?'🇲🇽 Mexicano':'🎾 Americano'}</span></span>
+      <span class="small muted" id="scoreStatus">${scoredStatus()}</span>
+    </div>
+    <div class="bar"><span style="width:${pct}%"></span></div>
+  </div>
+
+  ${state.liveCode
+    ? `<div class="card" style="border-color:var(--accent)">
+        <div class="ch" style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:800">🔴 LIVE · code <span style="color:var(--accent);letter-spacing:2px">${state.liveCode}</span></span><button class="btn ghost sm" onclick="stopLive()">Stop</button></div>
+        <div class="small muted" style="margin-top:4px">Anyone who scans watches your scores update in real time.</div>
+        <button class="btn ghost block" style="margin-top:10px" onclick="toggleLiveQR()">📷 ${showLiveQR?'Hide':'Show'} QR code</button>
+        ${showLiveQR ? (window.qrcode ? `<div style="text-align:center;margin-top:12px"><img src="${qrFor(liveUrl())}" alt="Live game QR" style="width:200px;height:200px;border-radius:14px;background:#fff;padding:10px"/><div class="small muted" style="margin-top:6px">Scan to watch live 🎾</div></div>` : `<div class="small muted" style="text-align:center;margin-top:12px">Loading QR…</div>`) : ''}
+      </div>`
+    : `<div class="card"><button class="btn cyan block" onclick="goLive()">📡 Go live — let everyone watch</button><div class="small muted" style="margin-top:8px;text-align:center">Creates a QR; anyone who scans sees scores update in real time.</div></div>`}
+
+  <div class="card">
+    <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+      <h2 style="margin:0">Matches</h2>
+      ${state.mode==='mexicano' ? `<span class="pill" style="align-self:center">Set by leaderboard</span>` : `<button class="btn ghost sm" onclick="reshuffle()">🎲 Reshuffle</button>`}
+    </div>
+    ${courtsHTML}
+    ${byesHTML}
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>Standings so far</summary>
+      <div id="livePanel" class="live">${liveTableHTML()}</div>
+    </details>
+  </div>
+
+  <div class="actions">
+    ${ri>0?`<button class="btn ghost" onclick="prevRound()">← Back</button>`:""}
+    <button class="btn primary" onclick="nextRound()">${isLast?"Finish 🏆":"Next round →"}</button>
+  </div>
+  <div class="actions" style="justify-content:center;gap:18px;flex-wrap:wrap">
+    <button class="btn ghost sm" style="flex:0" onclick="finish()">Finish early</button>
+    <button class="btn ghost sm" style="flex:0" onclick="newGame(false)">🆕 New game</button>
+    ${history.length?`<button class="btn ghost sm" style="flex:0" onclick="showHistory()">📋 Saved (${history.length})</button>`:""}
+  </div>
+  `;
+}
+
+function liveTableHTML(){
+  const s=computeStandings();
+  const toggle=`<div style="margin-bottom:10px">${rankToggleHTML()}</div>`;
+  if(!s.some(x=>x.played)) return toggle+`<div class="muted small" style="padding:4px 0">Enter some scores to see the table.</div>`;
+  const wA=state.rankBy==="wins"?" active":"", pA=state.rankBy!=="wins"?" active":"";
+  return toggle+`<table><thead><tr><th class="rank">#</th><th>Player</th><th class="num${wA}">W</th><th class="num${pA}">Pts</th></tr></thead><tbody>
+    ${s.map((p,i)=>`<tr><td class="rank">${i+1}</td><td>${esc(p.name)}</td><td class="num${wA}">${p.wins}</td><td class="num${pA}">${p.points}</td></tr>`).join("")}
+  </tbody></table>`;
+}
+
+function resultsHTML(){
+  const s=computeStandings();
+  const played=s.some(x=>x.played);
+  const top=s[0];
+  const winners = played ? s.filter(p=>p.wins===top.wins && p.points===top.points) : [];
+  const medals=["🥇","🥈","🥉"];
+
+  const banner = !played
+    ? `<div class="card"><div class="muted">No scores were entered, so there's no winner yet.</div></div>`
+    : `<div class="winnerbanner">
+        <div class="crown">👑</div>
+        <div class="wname">${winners.map(w=>esc(w.name)).join(" & ")}</div>
+        <div class="wstat">${winners.length>1?"Tied champions":"Champion"} · ${plural(top.wins,"win")} · ${top.points} points</div>
+      </div>`;
+
+  const wA=state.rankBy==="wins"?" active":"", pA=state.rankBy!=="wins"?" active":"";
+  const table = `<div class="card">
+    <div class="ch" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+      <h2 style="margin:0">Final standings</h2>
+      ${rankToggleHTML()}
+    </div>
+    <table><thead><tr><th class="rank">#</th><th>Player</th><th class="num">Played</th><th class="num${wA}">Wins</th><th class="num${pA}">Points</th></tr></thead>
+    <tbody>
+    ${s.map((p,i)=>`<tr class="${i===0&&played?'top1':''}">
+      <td class="rank">${played&&i<3?medals[i]:(i+1)}</td>
+      <td>${esc(p.name)}</td>
+      <td class="num">${p.played}</td>
+      <td class="num${wA}">${p.wins}</td>
+      <td class="num${pA}">${p.points}</td>
+    </tr>`).join("")}
+    </tbody></table>
+  </div>`;
+
+  const potHTML = state.buyIn>0 ? potCardHTML(s, played) : "";
+
+  return `
+  ${banner}
+  ${table}
+  ${potHTML}
+  <div class="card stack">
+    <div class="actions">
+      <button class="btn ghost" onclick="backToPlay()">← Back to rounds</button>
+      <button class="btn cyan" onclick="addAnotherRound()">➕ Add a round</button>
+    </div>
+    <div class="actions">
+      <button class="btn primary" onclick="newGame(false)">🆕 New game</button>
+      <button class="btn ghost" onclick="newGame(true)">Rematch — same players</button>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" onclick="exportPDF()">📄 Export PDF</button>
+      <button class="btn ghost" onclick="showHistory()">📋 Saved (${history.length})</button>
+    </div>
+    <button class="btn ghost block" onclick="goHome()">⌂ Home</button>
+  </div>`;
+}
+
+/* ---------- Supabase auth — KOURT project only (anon public key; never service_role) ---------- */
+const SUPABASE_URL = "https://yeuyjgjxypqflynephhq.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlldXlqZ2p4eXBxZmx5bmVwaGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDE3ODYsImV4cCI6MjA5NzI3Nzc4Nn0.JsOcrIJ19_LS1WX5h4Sjeh-lOENV2GZr28BFd8uuW9M";
+let sb=null, authUser=null, authMsg="", authReady=false;
+let liveView=null, liveChannel=null, _liveTimer=null;
+function loadSupabase(){
+  setTimeout(function(){ if(!authReady){ authReady=true; render(); } }, 4500);  // never stuck on "Loading"
+  if(window.supabase){ initSupabase(); return; }
+  var s=document.createElement("script");
+  s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+  s.onload=initSupabase; s.onerror=function(){ authReady=true; render(); };
+  document.head.appendChild(s);
+}
+function initSupabase(){
+  try{
+    if(!window.supabase || sb) return;
+    sb=window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sb.auth.getSession().then(function(r){
+      authUser=(r.data&&r.data.session)?r.data.session.user:null;
+      authReady=true;
+      if(authUser){ if(!view) view="home"; render(); cloudLoadGames(); maybeJoinLive(); } else { render(); }
+    });
+    sb.auth.onAuthStateChange(function(evt, session){
+      authUser = session ? session.user : null;
+      authReady=true;
+      if(evt==="SIGNED_IN"){ authMsg=""; if(authUser&&authUser.email) setEmail(authUser.email); view="home"; cloudLoadGames(); maybeJoinLive(); }
+      if(evt==="SIGNED_OUT"){ view=null; liveView=null; }
+      render();
+    });
+  }catch(e){}
+}
+async function sendMagicLink(email){
+  email=(email||"").trim();
+  if(!email||email.indexOf("@")<1){ authMsg="Enter a valid email first."; render(); return; }
+  if(!sb){ authMsg="Can't reach the server — check your connection and try again."; render(); return; }
+  authMsg="Sending…"; render();
+  try{
+    var res=await sb.auth.signInWithOtp({ email:email, options:{ emailRedirectTo: location.origin+"/" } });
+    authMsg = res.error ? ("Couldn't send: "+res.error.message) : ("✉️ Sent! Check "+email+" for the sign-in link.");
+  }catch(e){ authMsg="Something went wrong sending the link."; }
+  render();
+}
+async function signOut(){ try{ if(sb) await sb.auth.signOut(); }catch(e){} authUser=null; authMsg=""; entered=false; view=null; render(); window.scrollTo(0,0); }
+
+/* ---------- cloud sync of games (KOURT Supabase; signed-in users only) ---------- */
+async function cloudSaveGame(entry){
+  if(!sb||!authUser||!entry||!entry.id) return;
+  try{
+    await sb.from("games").upsert({
+      user_id: authUser.id, game_id: entry.id,
+      snapshot: entry.snapshot, summary: entry.summary||null,
+      saved_at: new Date(entry.savedAt||Date.now()).toISOString()
+    }, { onConflict: "user_id,game_id" });
+  }catch(e){}
+}
+async function cloudDeleteGame(id){
+  if(!sb||!authUser||!id) return;
+  try{ await sb.from("games").delete().eq("user_id", authUser.id).eq("game_id", id); }catch(e){}
+}
+async function cloudLoadGames(){
+  if(!sb||!authUser) return;
+  try{
+    const res = await sb.from("games").select("game_id,snapshot,summary,saved_at").eq("user_id", authUser.id);
+    if(res.error || !res.data) return;
+    const byId={}; history.forEach(function(h){ byId[h.id]=h; });
+    const inCloud={};
+    res.data.forEach(function(row){
+      inCloud[row.game_id]=true;
+      const savedAt = row.saved_at ? Date.parse(row.saved_at) : Date.now();
+      const ex = byId[row.game_id];
+      if(!ex || savedAt > (ex.savedAt||0)) byId[row.game_id]={ id:row.game_id, savedAt:savedAt, summary:row.summary||{}, snapshot:row.snapshot };
+    });
+    history = Object.keys(byId).map(function(k){ return byId[k]; }).sort(function(a,b){ return b.savedAt-a.savedAt; });
+    saveHistory(); render();
+    for(var i=0;i<history.length;i++){ if(!inCloud[history[i].id]) await cloudSaveGame(history[i]); }
+  }catch(e){}
+}
+
+/* ---------- shareable invite link ---------- */
+function inviteUrl(){ return location.origin + location.pathname + "?invite=1"; }
+async function createInviteLink(){
+  var url=inviteUrl();
+  var text="🎾 Join me on KOURT — padel tournaments, leagues & stats. Jump in:";
+  if(navigator.share){
+    try{ await navigator.share({ title:"KOURT", text:text, url:url }); return; }
+    catch(e){ if(e&&e.name==="AbortError") return; }
+  }
+  try{ await navigator.clipboard.writeText(url); authMsg="🔗 Invite link copied — paste it into WhatsApp!"; }
+  catch(e){ authMsg="Your invite link: "+url; }
+  render();
+}
+let showQR=false, showLiveQR=false;
+function loadQRLib(cb){ if(window.qrcode){ cb(); return; } var s=document.createElement("script"); s.src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"; s.onload=cb; s.onerror=function(){}; document.head.appendChild(s); }
+function qrFor(text){ try{ var qr=qrcode(0,"M"); qr.addData(text); qr.make(); return qr.createDataURL(6,8); }catch(e){ return ""; } }
+function toggleInviteQR(){ showQR=!showQR; if(showQR && !window.qrcode){ loadQRLib(function(){ render(); }); } render(); }
+function inviteQRDataUrl(){ return qrFor(inviteUrl()); }
+
+/* ---------- live game sync (Supabase Realtime; watch-along) ---------- */
+function liveUrl(){ return location.origin + location.pathname + "?live=" + (state.liveCode||""); }
+function genLiveCode(){ var c="", a="ACDEFGHJKLMNPQRSTUVWXYZ23456789"; for(var i=0;i<5;i++) c+=a[Math.floor(Math.random()*a.length)]; return c; }
+async function pushLiveNow(){
+  if(!sb||!authUser||!state.liveCode) return;
+  try{ await sb.from("live_games").upsert({ code:state.liveCode, host_id:authUser.id, state:JSON.parse(JSON.stringify(state)), updated_at:new Date().toISOString() }, { onConflict:"code" }); }catch(e){}
+}
+function pushLive(){ if(!state.liveCode||!sb||!authUser) return; clearTimeout(_liveTimer); _liveTimer=setTimeout(pushLiveNow, 350); }
+async function goLive(){
+  if(!sb||!authUser){ authMsg="Sign in to go live."; render(); return; }
+  if(!state.liveCode) state.liveCode=genLiveCode();
+  showLiveQR=true; if(!window.qrcode) loadQRLib(render);
+  save(); await pushLiveNow(); render(); window.scrollTo(0,0);
+}
+async function stopLive(){
+  var code=state.liveCode;
+  if(sb&&authUser&&code){ try{ await sb.from("live_games").delete().eq("code",code).eq("host_id",authUser.id); }catch(e){} }
+  state.liveCode=null; showLiveQR=false; save(); render();
+}
+function toggleLiveQR(){ showLiveQR=!showLiveQR; if(showLiveQR && !window.qrcode) loadQRLib(render); render(); }
+function pendingLiveCode(){ try{ return new URLSearchParams(location.search).get("live") || localStorage.getItem("pendingLive"); }catch(e){ return null; } }
+function maybeJoinLive(){ var c=pendingLiveCode(); if(c && authUser && !liveView){ try{ localStorage.removeItem("pendingLive"); }catch(e){} joinLive(c); } }
+async function joinLive(code){
+  if(!sb||!code) return;
+  liveView={ code:code, state:null, loading:true }; render();
+  try{ var res=await sb.from("live_games").select("state").eq("code",code).maybeSingle(); liveView.state=(res&&res.data&&res.data.state)?res.data.state:null; }catch(e){ liveView.state=null; }
+  liveView.loading=false; render();
+  try{
+    if(liveChannel) sb.removeChannel(liveChannel);
+    liveChannel=sb.channel("live-"+code).on("postgres_changes", { event:"*", schema:"public", table:"live_games", filter:"code=eq."+code }, function(payload){
+      if(payload && payload.eventType==="DELETE"){ if(liveView) liveView.state=null; render(); return; }
+      if(payload && payload.new && payload.new.state){ if(liveView) liveView.state=payload.new.state; render(); }
+    }).subscribe();
+  }catch(e){}
+}
+function leaveLive(){ try{ if(liveChannel) sb.removeChannel(liveChannel); }catch(e){} liveChannel=null; liveView=null; try{ var u=new URL(location.href); u.searchParams.delete("live"); history.replaceState(null,"",u); }catch(e){} render(); }
+function liveScoreboardHTML(){
+  const back=`<button class="btn ghost sm" onclick="leaveLive()">← Leave</button>`;
+  if(liveView.loading) return `<div class="card"><div class="muted" style="padding:12px 0">Connecting to the live game…</div></div>`;
+  if(!liveView.state) return `<div class="card"><div class="ch" style="display:flex;justify-content:space-between;align-items:center"><h2 style="margin:0">Live game</h2>${back}</div><div class="muted" style="padding:10px 0">This live game isn't running right now — the host may not have started it yet, or has ended it.</div></div>`;
+  const s=liveView.state, ri=s.currentRound||0, round=(s.rounds||[])[ri], nm={};
+  (s.players||[]).forEach(p=>nm[p.id]=p.name);
+  const standings=standingsOf(s);
+  const courtsHTML = round && round.courts ? round.courts.map((c,i)=>{
+    const aW=c.scoreA!=null&&c.scoreB!=null&&c.scoreA>c.scoreB, bW=c.scoreA!=null&&c.scoreB!=null&&c.scoreB>c.scoreA;
+    return `<div class="court"><div class="ch"><span class="name">🏟️ Court ${i+1}</span></div>
+      <div class="team${aW?' win':''}"><div class="names">${c.teamA.map(id=>esc(nm[id]||'?')).join(' <span class="amp">+</span> ')}</div><div class="score" style="font-size:22px;font-weight:800">${c.scoreA==null?'–':c.scoreA}</div></div>
+      <div class="vs">vs</div>
+      <div class="team${bW?' win':''}"><div class="names">${c.teamB.map(id=>esc(nm[id]||'?')).join(' <span class="amp">+</span> ')}</div><div class="score" style="font-size:22px;font-weight:800">${c.scoreB==null?'–':c.scoreB}</div></div></div>`;
+  }).join("") : `<div class="muted" style="padding:8px 0">Waiting for the round to start…</div>`;
+  const rows=standings.map((p,i)=>`<tr class="${i===0?'top1':''}"><td class="rank">${i<3?['🥇','🥈','🥉'][i]:(i+1)}</td><td>${esc(p.name)}</td><td class="num">${p.wins}</td><td class="num active">${p.points}</td></tr>`).join("");
+  return `
+  <div class="card">
+    <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h2 style="margin:0">🔴 LIVE · Round ${ri+1}${s.numRounds?' / '+s.numRounds:''}</h2>${back}</div>
+    <div class="small muted" style="margin-bottom:8px">${s.mode==='mexicano'?'Mexicano':'Americano'} · updates in real time as scores come in 🎾</div>
+    ${courtsHTML}
+  </div>
+  <div class="card">
+    <h2>Standings</h2>
+    <table><thead><tr><th class="rank">#</th><th>Player</th><th class="num">W</th><th class="num active">Pts</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>`;
+}
+
+/* ---------- boot ---------- */
+const APP_VERSION = "2.0";
+render();
+(function(){ var v=document.getElementById("ver"); if(v) v.textContent="v"+APP_VERSION; })();
+try{ var _lc=new URLSearchParams(location.search).get("live"); if(_lc) localStorage.setItem("pendingLive",_lc); }catch(e){}
+loadSupabase();
+
+/* ---------- PWA: offline + installable + auto-update ---------- */
+if("serviceWorker" in navigator){
+  var swRefreshing=false;
+  navigator.serviceWorker.addEventListener("controllerchange", function(){ if(swRefreshing) return; swRefreshing=true; window.location.reload(); });
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").then(function(reg){ if(reg) reg.update(); }).catch(function(){});
+  });
+}
+</script>
+</body>
+</html>

@@ -1,8 +1,13 @@
 /* Padelsluts service worker — offline app shell (network-first so updates land immediately) */
-const CACHE = "padelsluts-v3";
+const CACHE = "kourt-v5";
 const ASSETS = [
   "./",
   "./index.html",
+  "./app.html",
+  "./kings.html",
+  "./hero.jpg",
+  "./app-shot-1.jpg",
+  "./app-shot-2.jpg",
   "./manifest.webmanifest",
   "./icon-192.png",
   "./icon-512.png",

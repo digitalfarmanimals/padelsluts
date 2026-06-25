@@ -1,8 +1,8 @@
 {
-  "name": "Kourt Padel",
-  "short_name": "Kourt",
-  "description": "Americano padel tournaments — random partners every round, one winner.",
-  "start_url": "./",
+  "name": "KOURT — Play Padel",
+  "short_name": "KOURT",
+  "description": "Play padel Americano & Mexicano, track stats, climb the leaderboard — qualify for KOURT KING.",
+  "start_url": "./app.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
