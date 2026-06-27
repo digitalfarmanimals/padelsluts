@@ -74,7 +74,7 @@
       <label class="fld">Your email</label>
       <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com">
       <label class="fld">Access code</label>
-      <input id="code" type="password" placeholder="Enter the code you were given">
+      <input id="code" type="password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Enter the code you were given">
       <label class="agree"><input type="checkbox" id="agree"> <span>I understand these materials are confidential and agree not to share them.</span></label>
       <button class="btn" id="unlock" onclick="unlock()">Unlock documents</button>
       <div class="err" id="err"></div>
@@ -124,7 +124,7 @@
 
   async function unlock(){
     const email=(document.getElementById("email").value||"").trim().toLowerCase();
-    const code=(document.getElementById("code").value||"");
+    const code=(document.getElementById("code").value||"").trim().toLowerCase();
     const agreed=document.getElementById("agree").checked;
     const err=document.getElementById("err");
     err.textContent="";
