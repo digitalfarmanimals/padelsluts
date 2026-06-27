@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>KOURT KING — Casting Desk</title>
+<link rel="icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0B0D; --bg2:#101216; --card:#15181E; --card2:#1B1F26;
+    --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.18);
+    --volt:#C7F23D; --volt-d:#A6CC2A; --white:#F4F6F2; --dim:#878E99; --dim2:#5A616B;
+    --danger:#ff5a5f; --label:'Archivo',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--white);font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5;padding:0 0 60px}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+  a{color:inherit}
+  .mono{width:38px;height:38px;border-radius:50%;background:var(--volt);display:flex;align-items:center;justify-content:center;font-family:var(--label);font-weight:900;font-style:italic;color:#0A0B0D;font-size:22px;flex:none}
+
+  header{position:sticky;top:0;z-index:20;background:rgba(10,11,13,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .hrow{display:flex;align-items:center;justify-content:space-between;gap:14px;height:66px}
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand .wm{font-family:var(--label);font-weight:900;font-style:italic;font-size:17px}
+  .brand .wm i{color:var(--volt);font-style:italic}
+  .brand .sub{font-family:var(--label);font-weight:700;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-top:1px}
+  .who{font-size:12.5px;color:var(--dim);text-align:right}
+  .who a{color:var(--dim);text-decoration:underline;cursor:pointer;font-weight:700}
+
+  .gate{max-width:440px;margin:14vh auto 0;text-align:center;padding:0 20px}
+  .gate .mono{margin:0 auto 18px;width:54px;height:54px;font-size:30px}
+  .gate h1{font-family:'Anton';font-size:30px;text-transform:uppercase;margin-bottom:10px}
+  .gate p{color:var(--dim);margin-bottom:20px}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--label);font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;border-radius:12px;padding:13px 20px;cursor:pointer;border:1.5px solid transparent;transition:.15s;text-decoration:none}
+  .btn.volt{background:var(--volt);color:#0A0B0D}
+  .btn.volt:hover{filter:brightness(1.07)}
+  .btn.ghost{background:transparent;color:var(--white);border-color:var(--line2)}
+  .btn.ghost:hover{border-color:var(--volt);color:var(--volt)}
+  .btn.sm{padding:8px 12px;font-size:11px;border-radius:9px}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:26px 0}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 18px}
+  .stat .n{font-family:'Anton';font-size:40px;line-height:1;color:var(--volt)}
+  .stat .l{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-top:8px;font-family:var(--label);font-weight:700}
+
+  .tabs{display:flex;gap:8px;margin:8px 0 18px;border-bottom:1px solid var(--line)}
+  .tab{font-family:var(--label);font-weight:800;font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--dim);background:none;border:0;border-bottom:2px solid transparent;padding:12px 6px;cursor:pointer;margin-bottom:-1px}
+  .tab.on{color:var(--white);border-bottom-color:var(--volt)}
+
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .toolbar select,.toolbar input{background:var(--card2);border:1px solid var(--line);color:var(--white);border-radius:10px;padding:9px 12px;font-family:inherit;font-size:14px;outline:none}
+  .toolbar select:focus,.toolbar input:focus{border-color:var(--volt)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+  .ent{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+  .ent.shortlist{border-color:var(--volt)}
+  .vid{position:relative;aspect-ratio:9/12;background:#000;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden}
+  .vid video{width:100%;height:100%;object-fit:contain;background:#000}
+  .vid .play{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--volt)}
+  .vid .play svg{width:46px;height:46px}
+  .vid .play .pt{font-family:var(--label);font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+  .ent .meta{padding:14px}
+  .ent .nm{font-family:var(--label);font-weight:900;font-style:italic;text-transform:uppercase;font-size:17px}
+  .ent .ci{color:var(--volt);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
+  .ent .pitch{color:var(--dim);font-size:14px;margin-top:8px;font-style:italic}
+  .ent .sub2{color:var(--dim2);font-size:11.5px;margin-top:8px;display:flex;justify-content:space-between;gap:8px}
+  .ent .acts{display:flex;gap:6px;padding:0 14px 14px;flex-wrap:wrap}
+  .ent .acts .btn{flex:1;min-width:72px}
+  .pill{display:inline-block;font-family:var(--label);font-weight:800;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:999px;border:1px solid var(--line2);color:var(--dim)}
+  .pill.shortlist{color:var(--volt);border-color:var(--volt)}
+  .pill.cast{color:#0A0B0D;background:var(--volt);border-color:var(--volt)}
+  .pill.pass{color:var(--danger);border-color:rgba(255,90,95,.4)}
+
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:11px 10px;border-bottom:1px solid var(--line);font-size:14px}
+  th{font-family:var(--label);font-weight:800;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+  .muted{color:var(--dim)}
+  .empty{text-align:center;color:var(--dim);padding:50px 20px;border:1px dashed var(--line);border-radius:16px}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap hrow">
+    <a class="brand" href="#"><span class="mono">K</span><span><span class="wm">KOURT<i>KING</i></span><div class="sub">Casting Desk</div></span></a>
+    <div class="who" id="who"></div>
+  </div>
+</header>
+
+<div id="view"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL="https://yeuyjgjxypqflynephhq.supabase.co";
+  const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlldXlqZ2p4eXBxZmx5bmVwaGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDE3ODYsImV4cCI6MjA5NzI3Nzc4Nn0.JsOcrIJ19_LS1WX5h4Sjeh-lOENV2GZr28BFd8uuW9M";
+  const ADMINS=["digitalfarmanimals@gmail.com"];  // who can see this desk
+  let sb=null; try{ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); }catch(e){}
+
+  const $=function(id){return document.getElementById(id);};
+  const esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
+  let entries=[], signups=[], tab="auditions", filterCity="", me=null;
+
+  function PLAY(){return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 8l6 4-6 4z"/></svg>';}
+
+  async function boot(){
+    if(!sb){ gate("Can't reach the server.", ""); return; }
+    var s=null; try{ s=(await sb.auth.getSession()).data.session; }catch(e){}
+    me = s && s.user ? s.user : null;
+    if(!me){ return gate("Sign in to continue", '<p>Sign in to the KOURT app first, then come back here.</p><a class="btn volt" href="app.html">Open the KOURT app →</a>'); }
+    if(ADMINS.indexOf((me.email||"").toLowerCase())<0){ return gate("Not authorised", '<p>'+esc(me.email||"")+' doesn\'t have access to the casting desk.</p><a class="btn ghost" href="app.html">Back to the app</a>'); }
+    $("who").innerHTML = esc(me.email)+' · <a onclick="signOut()">Sign out</a>';
+    await loadData();
+  }
+  function gate(title, body){
+    $("who").innerHTML="";
+    $("view").innerHTML='<div class="gate"><div class="mono">K</div><h1>'+esc(title)+'</h1>'+body+'</div>';
+  }
+  async function signOut(){ try{ await sb.auth.signOut(); }catch(e){} location.reload(); }
+
+  async function loadData(){
+    $("view").innerHTML='<div class="wrap"><div class="empty" style="margin-top:40px">Loading the desk…</div></div>';
+    try{
+      var e=await sb.from("kk_entries").select("*").order("created_at",{ascending:false});
+      entries = (e.data)||[];
+      var g=await sb.from("kings_signups").select("*").order("created_at",{ascending:false});
+      signups = (g.data)||[];
+    }catch(err){}
+    render();
+  }
+
+  function statusPill(s){ s=s||"new"; var cls=(s==="shortlist"||s==="cast"||s==="pass")?s:""; var lbl=s==="new"?"New":s.charAt(0).toUpperCase()+s.slice(1); return '<span class="pill '+cls+'">'+lbl+'</span>'; }
+
+  function render(){
+    var cities=[...new Set(entries.map(function(e){return (e.city||"").trim();}).filter(Boolean))].sort();
+    var html='<div class="wrap">';
+    html+='<div class="stats">'
+      +stat(entries.length,"Auditions")
+      +stat(entries.filter(function(e){return e.status==="shortlist";}).length,"Shortlisted")
+      +stat(cities.length,"Cities")
+      +stat(signups.length,"Email sign-ups")
+      +'</div>';
+    html+='<div class="tabs"><button class="tab '+(tab==="auditions"?"on":"")+'" onclick="setTab(\'auditions\')">Auditions</button><button class="tab '+(tab==="signups"?"on":"")+'" onclick="setTab(\'signups\')">Sign-ups</button></div>';
+
+    if(tab==="auditions"){
+      html+='<div class="toolbar"><select onchange="setCity(this.value)"><option value="">All cities</option>'+cities.map(function(c){return '<option value="'+esc(c)+'"'+(filterCity===c?" selected":"")+'>'+esc(c)+'</option>';}).join("")+'</select><span class="muted" style="font-size:13px">'+shownEntries().length+' shown</span></div>';
+      var list=shownEntries();
+      if(!list.length){ html+='<div class="empty">No auditions yet.<br><span class="muted">They\'ll appear here the moment someone enters the hunt.</span></div>'; }
+      else{ html+='<div class="grid">'+list.map(entryCard).join("")+'</div>'; }
+    } else {
+      if(!signups.length){ html+='<div class="empty">No sign-ups yet.</div>'; }
+      else{
+        html+='<div class="toolbar"><button class="btn ghost sm" onclick="copyEmails()">Copy all emails</button><span class="muted" style="font-size:13px">'+signups.length+' total</span></div>';
+        html+='<table><thead><tr><th>Email</th><th>Source</th><th>When</th></tr></thead><tbody>'+signups.map(function(s){return '<tr><td>'+esc(s.email)+'</td><td class="muted">'+esc(s.source||"")+'</td><td class="muted">'+fmtDate(s.created_at)+'</td></tr>';}).join("")+'</tbody></table>';
+      }
+    }
+    html+='</div>';
+    $("view").innerHTML=html;
+  }
+  function stat(n,l){ return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
+  function shownEntries(){ return entries.filter(function(e){ return !filterCity || (e.city||"").trim()===filterCity; }); }
+  function fmtDate(d){ if(!d) return ""; try{ var x=new Date(d); return x.toLocaleDateString(undefined,{day:"numeric",month:"short"}); }catch(e){ return ""; } }
+
+  function entryCard(e){
+    return '<div class="ent '+(e.status==="shortlist"?"shortlist":"")+'" id="ent-'+e.id+'">'
+      +'<div class="vid" onclick="playVid(\''+e.id+'\')" id="vid-'+e.id+'"><div class="play">'+PLAY()+'<span class="pt">Play audition</span></div></div>'
+      +'<div class="meta"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div class="nm">'+esc(e.name||"—")+'</div><div class="ci">'+esc(e.city||"")+(e.handle?' · '+esc(e.handle):"")+'</div></div>'+statusPill(e.status)+'</div>'
+      +(e.pitch?'<div class="pitch">"'+esc(e.pitch)+'"</div>':"")
+      +'<div class="sub2"><span>'+fmtDate(e.created_at)+'</span><span>'+(e.file_size?Math.round(e.file_size/1048576)+' MB':"")+'</span></div></div>'
+      +'<div class="acts"><button class="btn ghost sm" onclick="setStatus(\''+e.id+'\',\'shortlist\')">Shortlist</button><button class="btn volt sm" onclick="setStatus(\''+e.id+'\',\'cast\')">Cast</button><button class="btn ghost sm" onclick="setStatus(\''+e.id+'\',\'pass\')">Pass</button></div>'
+      +'</div>';
+  }
+
+  async function playVid(id){
+    var e=entries.find(function(x){return x.id===id;}); if(!e||!e.video_path) return;
+    var box=$("vid-"+id); box.innerHTML='<div class="play"><span class="pt">Loading…</span></div>';
+    var key=String(e.video_path).replace(/^auditions\//,"");
+    try{
+      var r=await sb.storage.from("auditions").createSignedUrl(key, 3600);
+      var url=r.data&&r.data.signedUrl;
+      if(url){ box.onclick=null; box.innerHTML='<video src="'+url+'" controls autoplay playsinline></video>'; }
+      else throw new Error("no url");
+    }catch(err){ box.innerHTML='<div class="play"><span class="pt" style="color:var(--danger)">Can\'t load video</span></div>'; }
+  }
+
+  async function setStatus(id, status){
+    var e=entries.find(function(x){return x.id===id;}); if(!e) return;
+    var prev=e.status; e.status=status;
+    try{ await sb.from("kk_entries").update({status:status}).eq("id",id); }catch(err){ e.status=prev; }
+    render();
+  }
+  function setTab(t){ tab=t; render(); }
+  function setCity(c){ filterCity=c; render(); }
+  function copyEmails(){
+    var txt=signups.map(function(s){return s.email;}).join("\n");
+    try{ navigator.clipboard.writeText(txt); alert("Copied "+signups.length+" emails."); }catch(e){ prompt("Copy these:", txt); }
+  }
+
+  boot();
+</script>
+</body>
+</html>
