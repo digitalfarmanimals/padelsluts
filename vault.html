@@ -15,7 +15,10 @@
     --label:'Archivo',system-ui,sans-serif;
   }
   *{margin:0;padding:0;box-sizing:border-box}
-  body{background:var(--bg);color:var(--white);font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.55;min-height:100vh}
+  html{background:var(--bg)}
+  body{background:transparent;color:var(--white);font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.55;min-height:100vh}
+  .bgvid{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
+  .bgscrim{position:fixed;inset:0;background:rgba(8,9,11,.82);z-index:-1}
   .wrap{max-width:760px;margin:0 auto;padding:0 22px}
   .mono{width:42px;height:42px;border-radius:50%;background:var(--volt);display:flex;align-items:center;justify-content:center;font-family:var(--label);font-weight:900;font-style:italic;color:#0A0B0D;font-size:25px;flex:none}
   .eyebrow{font-family:var(--label);font-weight:800;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--volt)}
@@ -64,6 +67,8 @@
 </style>
 </head>
 <body>
+<video class="bgvid" autoplay muted loop playsinline preload="auto"><source src="hero.mp4" type="video/mp4"></video>
+<div class="bgscrim"></div>
   <!-- GATE -->
   <div class="gate" id="gate">
     <div class="lock">
@@ -154,6 +159,7 @@
 
   // allow Enter key to submit
   document.getElementById("code").addEventListener("keydown",function(e){ if(e.key==="Enter") unlock(); });
+  try{ var _bv=document.querySelector(".bgvid"); if(_bv){ var _p=_bv.play(); if(_p&&_p.catch) _p.catch(function(){}); } }catch(e){}
 </script>
 </body>
 </html>
