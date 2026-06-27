@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>KOURT KING — Confidential</title>
+<link rel="icon" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0B0D; --bg2:#101216; --card:#15181E; --card2:#1B1F26;
+    --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.18);
+    --volt:#C7F23D; --white:#F4F6F2; --dim:#878E99; --dim2:#5A616B; --danger:#ff5a5f;
+    --label:'Archivo',system-ui,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--white);font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.55;min-height:100vh}
+  .wrap{max-width:760px;margin:0 auto;padding:0 22px}
+  .mono{width:42px;height:42px;border-radius:50%;background:var(--volt);display:flex;align-items:center;justify-content:center;font-family:var(--label);font-weight:900;font-style:italic;color:#0A0B0D;font-size:25px;flex:none}
+  .eyebrow{font-family:var(--label);font-weight:800;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--volt)}
+  .crown{width:46px;height:42px;color:var(--volt);display:block;margin:0 auto 14px}
+  .crown svg{width:100%;height:100%;display:block}
+
+  /* gate */
+  .gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 22px}
+  .lock{max-width:460px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:34px 28px;text-align:center}
+  .lock h1{font-family:'Anton';font-size:30px;text-transform:uppercase;letter-spacing:.01em;margin:14px 0 12px}
+  .clause{color:var(--dim);font-size:14.5px;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;text-align:left;margin:8px 0 20px}
+  .fld{display:block;text-align:left;font-family:var(--label);font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:0 0 6px}
+  input[type=email],input[type=password]{width:100%;background:var(--card2);border:1px solid var(--line);color:var(--white);border-radius:12px;padding:14px 15px;font-size:16px;font-family:inherit;outline:none;margin-bottom:14px;transition:border-color .15s}
+  input:focus{border-color:var(--volt)}
+  .agree{display:flex;gap:10px;align-items:flex-start;text-align:left;font-size:13.5px;color:var(--dim);margin-bottom:18px;cursor:pointer}
+  .agree input{margin-top:3px;width:17px;height:17px;accent-color:var(--volt);flex:none}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;font-family:var(--label);font-weight:800;font-size:14px;letter-spacing:.05em;text-transform:uppercase;border-radius:13px;padding:15px 20px;cursor:pointer;border:1.5px solid transparent;background:var(--volt);color:#0A0B0D;transition:.15s}
+  .btn:hover{filter:brightness(1.07)}
+  .btn:disabled{opacity:.55;cursor:default}
+  .err{color:var(--danger);font-size:13px;margin-top:12px;min-height:0}
+  .foot{color:var(--dim2);font-size:11px;letter-spacing:.08em;margin-top:18px}
+
+  /* docs (revealed) */
+  .docs{display:none;padding:30px 0 70px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:26px}
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand .wm{font-family:var(--label);font-weight:900;font-style:italic;font-size:17px}
+  .brand .wm i{color:var(--volt)}
+  .conf{font-family:var(--label);font-weight:800;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--danger);border:1px solid rgba(255,90,95,.4);border-radius:999px;padding:5px 11px}
+  .docintro{margin-bottom:22px}
+  .docintro h2{font-family:'Anton';font-size:clamp(26px,5vw,40px);text-transform:uppercase;line-height:1}
+  .docintro p{color:var(--dim);font-size:14px;margin-top:8px}
+  .dcard{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px;transition:border-color .15s}
+  .dcard:hover{border-color:var(--line2)}
+  .dnum{font-family:'Anton';font-size:30px;color:var(--volt);line-height:1;width:34px;flex:none}
+  .dmeta{flex:1;min-width:0}
+  .dmeta .t{font-family:var(--label);font-weight:900;font-style:italic;text-transform:uppercase;font-size:18px}
+  .dmeta .d{color:var(--dim);font-size:13.5px;margin-top:3px}
+  .dacts{display:flex;gap:8px;flex:none}
+  .da{font-family:var(--label);font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border-radius:10px;padding:10px 14px;cursor:pointer;text-decoration:none;border:1.5px solid transparent}
+  .da.v{background:var(--volt);color:#0A0B0D}
+  .da.d{background:transparent;color:var(--white);border-color:var(--line2)}
+  .da.d:hover{border-color:var(--volt);color:var(--volt)}
+  .reminder{color:var(--dim2);font-size:12px;text-align:center;margin-top:24px;border-top:1px solid var(--line);padding-top:20px}
+  @media(max-width:560px){.dcard{flex-wrap:wrap}.dacts{width:100%}.da{flex:1;text-align:center}}
+</style>
+</head>
+<body>
+  <!-- GATE -->
+  <div class="gate" id="gate">
+    <div class="lock">
+      <span class="crown" id="crownHolder"></span>
+      <div class="eyebrow">KOURT KING · Confidential</div>
+      <h1>Confidential materials</h1>
+      <div class="clause">The documents beyond this point are <b style="color:var(--white)">strictly confidential</b>. By continuing you confirm you've been granted access, and agree not to share, copy or distribute them.</div>
+      <label class="fld">Your email</label>
+      <input id="email" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com">
+      <label class="fld">Access code</label>
+      <input id="code" type="password" placeholder="Enter the code you were given">
+      <label class="agree"><input type="checkbox" id="agree"> <span>I understand these materials are confidential and agree not to share them.</span></label>
+      <button class="btn" id="unlock" onclick="unlock()">Unlock documents</button>
+      <div class="err" id="err"></div>
+      <div class="foot">Access is recorded.</div>
+    </div>
+  </div>
+
+  <!-- DOCS (revealed after unlock) -->
+  <div class="docs" id="docs">
+    <div class="wrap">
+      <div class="topbar">
+        <span class="brand"><span class="mono">K</span><span class="wm">KOURT<i>KING</i></span></span>
+        <span class="conf">Confidential</span>
+      </div>
+      <div class="docintro">
+        <div class="eyebrow">Shared in confidence</div>
+        <h2>The materials</h2>
+        <p id="sharedWith"></p>
+      </div>
+      <div id="docList"></div>
+      <div class="reminder">These documents are confidential and were shared with you personally. Please don't forward or distribute them.</div>
+    </div>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Access code is stored as a SHA-256 hash (not the plain code). Current code: "kourtking2026"
+  // To change it: run  printf '%s' 'YOURNEWCODE' | shasum -a 256  and paste the hash below.
+  const CODE_HASH="ec81454e9c3cf7b59499f6e4b3218ccf09cf83068fc5be0bed88b750f319f2d7";
+
+  const SUPABASE_URL="https://yeuyjgjxypqflynephhq.supabase.co";
+  const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlldXlqZ2p4eXBxZmx5bmVwaGhxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDE3ODYsImV4cCI6MjA5NzI3Nzc4Nn0.JsOcrIJ19_LS1WX5h4Sjeh-lOENV2GZr28BFd8uuW9M";
+  let sb=null; try{ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); }catch(e){}
+
+  document.getElementById("crownHolder").innerHTML='<svg viewBox="0 0 24 22" fill="currentColor" aria-hidden="true"><path d="M3 7L7 11 12 4 17 11 21 7 19.4 19.5 4.6 19.5Z"/></svg>';
+
+  const DOCS=[
+    {t:"The Playbook", d:"Scouting, the game & The 20 — how it all works.", href:"vault/playbook.html", view:"Open", dl:null},
+    {t:"Creative Deck", d:"The vision, the format and the show.", href:"vault/creative-deck.pdf", view:"View", dl:"creative-deck.pdf"},
+    {t:"Financials Deck", d:"The numbers, the raise and the return.", href:"vault/financials-deck.pdf", view:"View", dl:"financials-deck.pdf"}
+  ];
+
+  async function sha256(str){
+    const buf=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+
+  async function unlock(){
+    const email=(document.getElementById("email").value||"").trim().toLowerCase();
+    const code=(document.getElementById("code").value||"");
+    const agreed=document.getElementById("agree").checked;
+    const err=document.getElementById("err");
+    err.textContent="";
+    if(!/^.+@.+\..+$/.test(email)){ err.textContent="Enter a valid email."; return; }
+    if(!agreed){ err.textContent="Please tick the box to confirm you'll keep these confidential."; return; }
+    if(!code){ err.textContent="Enter the access code."; return; }
+    const btn=document.getElementById("unlock"); btn.disabled=true; btn.textContent="Checking…";
+    let ok=false; try{ ok=(await sha256(code))===CODE_HASH; }catch(e){}
+    if(!ok){ err.textContent="That access code isn't right."; btn.disabled=false; btn.textContent="Unlock documents"; return; }
+    // record the access (fire-and-forget; never blocks entry)
+    try{ if(sb) sb.from("doc_access").insert({ email:email, agreed:true }); }catch(e){}
+    try{ sessionStorage.setItem("kk_vault_email", email); }catch(e){}
+    reveal(email);
+  }
+
+  function reveal(email){
+    document.getElementById("gate").style.display="none";
+    document.getElementById("sharedWith").textContent="Shared with "+email+". For your eyes only.";
+    document.getElementById("docList").innerHTML=DOCS.map(function(x,i){
+      var acts='<a class="da v" href="'+x.href+'" target="_blank" rel="noopener">'+x.view+' ↗</a>';
+      if(x.dl) acts+='<a class="da d" href="'+x.href+'" download="KourtKing-'+x.dl+'">Download</a>';
+      return '<div class="dcard"><div class="dnum">'+(i+1)+'</div><div class="dmeta"><div class="t">'+x.t+'</div><div class="d">'+x.d+'</div></div><div class="dacts">'+acts+'</div></div>';
+    }).join("");
+    document.getElementById("docs").style.display="block";
+    window.scrollTo(0,0);
+  }
+
+  // allow Enter key to submit
+  document.getElementById("code").addEventListener("keydown",function(e){ if(e.key==="Enter") unlock(); });
+</script>
+</body>
+</html>
