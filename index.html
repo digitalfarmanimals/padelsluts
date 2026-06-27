@@ -207,7 +207,7 @@ footer{border-top:1px solid var(--line);padding:46px 0 40px;}
 <!-- HERO -->
 <section class="hero" id="top">
   <div class="hero-video">
-    <video autoplay muted loop playsinline preload="auto">
+    <video autoplay muted loop playsinline preload="auto" poster="og.jpg">
       <source src="hero.mp4" type="video/mp4">
     </video>
   </div>
@@ -345,6 +345,14 @@ footer{border-top:1px solid var(--line);padding:46px 0 40px;}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
   document.documentElement.classList.add('js');
+  // hero video: ensure it plays on mobile (autoplay can be blocked, e.g. iOS Low Power Mode) — nudge on load + first tap
+  (function(){
+    var v=document.querySelector('.hero-video video'); if(!v) return;
+    v.muted=true; v.setAttribute('muted','');
+    function tryplay(){ try{ var p=v.play(); if(p&&p.catch) p.catch(function(){}); }catch(e){} }
+    tryplay();
+    ['touchstart','pointerdown','click'].forEach(function(ev){ document.addEventListener(ev,tryplay,{once:true,passive:true}); });
+  })();
   // nav scrolled state
   var hdr=document.getElementById('hdr');
   window.addEventListener('scroll',function(){hdr.classList.toggle('scrolled', window.scrollY>40);});
