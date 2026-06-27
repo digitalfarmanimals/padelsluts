@@ -179,6 +179,10 @@ footer{border-top:1px solid var(--line);padding:46px 0 40px;}
 /* reveal */
 .js .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease, transform .7s ease;}
 .js .reveal.in{opacity:1;transform:none;}
+/* hero sound toggle */
+.sound-toggle{position:fixed;bottom:20px;right:20px;z-index:40;display:inline-flex;align-items:center;gap:7px;background:rgba(10,11,13,.7);backdrop-filter:blur(8px);border:1px solid var(--line2);color:var(--white);border-radius:100px;padding:9px 14px;font-family:'Archivo';font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:border-color .18s,color .18s}
+.sound-toggle:hover{border-color:var(--volt);color:var(--volt)}
+.sound-toggle svg{width:15px;height:15px;flex:none}
 </style>
 </head>
 <body>
@@ -232,6 +236,8 @@ footer{border-top:1px solid var(--line);padding:46px 0 40px;}
     </div>
   </div>
   <div class="scrollcue"><span>Scroll</span><span class="l"></span></div>
+  <audio id="heroMusic" src="hero-music.m4a" preload="auto"></audio>
+  <button class="sound-toggle" id="soundToggle" aria-label="Toggle sound"></button>
 </section>
 
 <!-- THESIS -->
@@ -356,6 +362,31 @@ footer{border-top:1px solid var(--line);padding:46px 0 40px;}
     document.getElementById('signup').style.display='none';
     document.getElementById('okmsg').style.display='block';
   });
+
+  // hero music — plays once softly on first interaction (browsers block autoplay-with-sound until a gesture), then silent loops
+  (function(){
+    var m=document.getElementById("heroMusic"), btn=document.getElementById("soundToggle");
+    if(!m||!btn) return;
+    m.volume=0.25;
+    var ON=false, used=false;
+    var SPK_ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.5 8.5a5 5 0 010 7M19 5a9 9 0 010 14"/></svg>';
+    var SPK_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>';
+    function paint(){ btn.innerHTML=(ON?SPK_ON:SPK_OFF)+"<span>"+(ON?"Sound on":"Sound off")+"</span>"; }
+    function start(){ ON=true; try{ m.currentTime=0; var p=m.play(); if(p&&p.catch) p.catch(function(){ ON=false; paint(); }); }catch(e){} paint(); }
+    function stop(){ ON=false; try{ m.pause(); }catch(e){} try{ sessionStorage.setItem("kk_muted","1"); }catch(e){} paint(); }
+    btn.addEventListener("click", function(e){ e.stopPropagation(); ON?stop():start(); });
+    m.addEventListener("ended", function(){ ON=false; paint(); });
+    function offListeners(){ ["pointerdown","keydown","touchstart"].forEach(function(ev){ document.removeEventListener(ev,firstGesture); }); }
+    function firstGesture(e){
+      if(used) return;
+      if(e && e.target && btn.contains(e.target)){ used=true; offListeners(); return; }
+      used=true; offListeners();
+      var muted=false; try{ muted=sessionStorage.getItem("kk_muted")==="1"; }catch(e){}
+      if(!muted) start();
+    }
+    ["pointerdown","keydown","touchstart"].forEach(function(ev){ document.addEventListener(ev,firstGesture,{passive:true}); });
+    paint();
+  })();
 </script>
 </body>
 </html>
