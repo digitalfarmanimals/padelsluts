@@ -13,32 +13,34 @@
 <link rel="apple-touch-icon" href="apple-touch-icon-180.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400..900;1,400..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
 <title>KOURT — Play Padel</title>
 <style>
   :root{
-    --bg:#0e1116; --card:#181d26; --card2:#1f2632; --line:#2a3340;
-    --txt:#eef2f7; --muted:#8b94a3; --accent:#c8ff32; --accent-d:#a6db18;
-    --cyan:#34e1eb; --danger:#ff5a5f; --gold:#ffd34d;
-    --radius:16px; --shadow:0 10px 34px rgba(0,0,0,.45);
+    --bg:#0A0B0D; --bg2:#101216; --card:#15181E; --card2:#1B1F26; --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.18);
+    --txt:#F4F6F2; --muted:#878E99; --dim2:#5A616B; --accent:#C7F23D; --accent-d:#A6CC2A;
+    --cyan:#43E0FF; --danger:#ff5a5f; --gold:#C7F23D;
+    --radius:16px; --shadow:0 18px 50px rgba(0,0,0,.5);
     --display:'Anton','Arial Narrow','Helvetica Neue',sans-serif;
+    --label:'Archivo',system-ui,sans-serif;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0}
   body{
-    background:radial-gradient(1200px 600px at 50% -10%, #16202b 0%, var(--bg) 55%) fixed;
+    background:var(--bg);
     color:var(--txt);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    line-height:1.45; padding:env(safe-area-inset-top) 0 64px;
+    font-family:'Space Grotesk',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    line-height:1.5; padding:env(safe-area-inset-top) 0 64px;
     -webkit-font-smoothing:antialiased;
   }
   .wrap{max-width:680px;margin:0 auto;padding:18px 16px}
   header.app{display:flex;align-items:center;gap:12px;padding:6px 2px 14px}
-  .logo{width:48px;height:48px;flex-shrink:0;display:block}
-  .title{font-family:var(--display);font-weight:400;letter-spacing:1px;font-size:40px;line-height:.85;text-transform:uppercase;transform:skewX(-8deg)}
-  .title b{color:var(--accent);font-weight:400}
-  .tag{color:var(--muted);font-size:10.5px;margin-top:6px;text-transform:uppercase;letter-spacing:2px;font-weight:800}
-  .subtitle{font-family:var(--display);font-weight:400;font-size:15px;letter-spacing:7px;text-transform:uppercase;color:var(--accent);margin-top:2px;line-height:1;transform:skewX(-8deg)}
+  .logo{display:none}
+  .mono{width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--label);font-weight:900;font-style:italic;color:#0A0B0D;font-size:27px;flex-shrink:0}
+  .title{font-family:var(--label);font-weight:900;font-style:italic;letter-spacing:.01em;font-size:27px;line-height:1;text-transform:uppercase}
+  .title b{color:var(--accent);font-weight:900}
+  .tag{color:var(--muted);font-size:11px;margin-top:5px;text-transform:uppercase;letter-spacing:.16em;font-weight:600;font-family:var(--label)}
+  .subtitle{display:none}
   .potHead{display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
   .potTog{color:var(--muted);font-size:13px;font-weight:800;display:flex;align-items:center;gap:8px}
   #printArea{display:none}
@@ -57,20 +59,20 @@
     width:100%;background:var(--card2);border:1px solid var(--line);color:var(--txt);
     border-radius:12px;padding:13px 14px;outline:none;transition:border-color .15s,box-shadow .15s;
   }
-  input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(200,255,50,.15)}
-  .btn{border:none;border-radius:12px;padding:13px 16px;font-weight:800;cursor:pointer;transition:transform .04s,filter .15s;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-transform:uppercase;letter-spacing:.7px}
+  input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(199,242,61,.15)}
+  .btn{border:1.5px solid transparent;border-radius:13px;padding:14px 18px;font-family:var(--label);font-weight:800;font-size:14px;cursor:pointer;transition:transform .12s,filter .15s,background .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-transform:uppercase;letter-spacing:.05em}
   .btn:active{transform:translateY(1px)}
-  .btn.primary{background:var(--accent);color:#0c1208}
+  .btn.primary{background:var(--accent);color:#0A0B0D;box-shadow:0 14px 40px rgba(199,242,61,.22)}
   .btn.primary:hover{filter:brightness(1.05)}
   .btn.ghost{background:var(--card2);color:var(--txt);border:1px solid var(--line)}
-  .btn.cyan{background:var(--cyan);color:#03242a}
+  .btn.cyan{background:transparent;color:var(--accent);border-color:var(--accent)}
   .btn.block{width:100%}
-  .btn.lg{padding:17px;font-size:22px;font-family:var(--display);font-weight:400;letter-spacing:1.5px}
+  .btn.lg{padding:17px;font-size:15px;letter-spacing:.06em}
   .btn.sm{padding:8px 12px;font-size:13px;border-radius:10px}
   .btn.danger{background:transparent;color:var(--danger);border:1px solid rgba(255,90,95,.4)}
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
   .chip{background:var(--card2);border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer}
-  .chip.on{background:var(--accent);color:#0c1208;border-color:var(--accent)}
+  .chip.on{background:var(--accent);color:#0A0B0D;border-color:var(--accent)}
   .ranktoggle{display:inline-flex;align-items:center;gap:7px}
   .ranktoggle .rl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:800;margin-right:2px}
   .ranktoggle .chip{padding:6px 12px}
@@ -93,7 +95,7 @@
   .tile:hover{border-color:var(--accent)}
   .tile:active{transform:translateY(1px)}
   .tile .ti{font-size:30px;line-height:1}
-  .tile .tic{width:46px;height:46px;border-radius:13px;background:rgba(200,255,50,.12);border:1px solid rgba(200,255,50,.26);display:inline-flex;align-items:center;justify-content:center;color:var(--accent)}
+  .tile .tic{width:46px;height:46px;border-radius:13px;background:rgba(199,242,61,.12);border:1px solid rgba(199,242,61,.26);display:inline-flex;align-items:center;justify-content:center;color:var(--accent)}
   .tile .tic svg{width:25px;height:25px;display:block}
   .tile.soon .tic{background:rgba(255,255,255,.06);border-color:var(--line);color:var(--muted)}
   .tile .tt{font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:.5px;text-transform:uppercase}
@@ -111,7 +113,7 @@
   .pill{display:inline-block;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;color:var(--muted)}
   .progress{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:4px 0 2px}
   .bar{height:7px;background:var(--card2);border-radius:999px;overflow:hidden;flex:1}
-  .bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--accent));border-radius:999px;transition:width .3s}
+  .bar>span{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .3s}
 
   .court{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px;margin:12px 0}
   .court .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
@@ -134,7 +136,7 @@
   td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
   tr.me td{}
   .rank{font-weight:900;width:34px}
-  .top1 td{background:linear-gradient(90deg,rgba(200,255,50,.12),transparent)}
+  .top1 td{background:linear-gradient(90deg,rgba(199,242,61,.12),transparent)}
   .winnerbanner{text-align:center;background:linear-gradient(160deg,#202a16,#181d26);border:1px solid var(--accent-d);border-radius:var(--radius);padding:22px 16px;margin:14px 0}
   .winnerbanner .crown{font-size:40px}
   .winnerbanner .wname{font-family:var(--display);font-weight:400;font-size:34px;letter-spacing:1px;text-transform:uppercase;margin:6px 0 2px}
@@ -150,16 +152,33 @@
   details summary:before{content:"▸ ";color:var(--accent)}
   details[open] summary:before{content:"▾ "}
   @media (max-width:420px){ .title{font-size:24px} .score{width:62px;font-size:20px} }
+
+  /* ---- Enter the Hunt / audition ---- */
+  .kk-eyebrow{font-family:var(--label);font-weight:800;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}
+  .kk-enter{display:flex;align-items:center;gap:12px;cursor:pointer;border-color:var(--accent);background:linear-gradient(120deg,rgba(199,242,61,.13),rgba(199,242,61,.02));margin-top:6px}
+  .kk-enter-crown{width:34px;height:31px;color:var(--accent);flex:none;display:block}
+  .kk-enter-crown svg{width:100%;height:100%;display:block}
+  .kk-enter-t{font-family:var(--label);font-weight:900;font-style:italic;text-transform:uppercase;font-size:18px;letter-spacing:.01em}
+  .kk-enter-go{color:var(--accent);font-size:22px;font-weight:900}
+  .kk-showlink{display:block;text-align:center;margin-top:12px;color:var(--muted);font-size:12px;font-weight:700;font-family:var(--label);text-transform:uppercase;letter-spacing:.08em}
+  .aud-hero{background:linear-gradient(180deg,rgba(199,242,61,.08),var(--card));border-color:var(--line2)}
+  .aud-crown{display:block;width:46px;height:42px;color:var(--accent);margin-bottom:10px}
+  .aud-crown svg{width:100%;height:100%;display:block}
+  .dropzone{display:block;border:1.5px dashed var(--line2);border-radius:14px;padding:24px 16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;background:var(--card2)}
+  .dropzone:hover{border-color:var(--accent);background:rgba(199,242,61,.04)}
+  .dz-inner{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .dz-ic{color:var(--accent)}
+  .dz-ic svg{width:26px;height:26px;display:block}
+  .dz-t{font-family:var(--label);font-weight:800;font-size:14px}
 </style>
 </head>
 <body>
   <div class="wrap">
     <header class="app">
-      <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="KOURT"><circle cx="50" cy="50" r="49" fill="#c8ff32"/><text x="50" y="51" text-anchor="middle" dominant-baseline="central" font-family="'Arial Black',Arial,sans-serif" font-weight="900" font-size="66" fill="#0b0e13">K</text></svg>
+      <span class="mono">K</span>
       <div>
-        <div class="title"><b>K</b>OURT</div>
-        <div class="subtitle">Padel</div>
-        <div class="tag">Americano &amp; Mexicano · partners shuffled · one winner</div>
+        <div class="title">KOURT</div>
+        <div class="tag">Padel · Americano &amp; Mexicano</div>
       </div>
     </header>
     <div id="app"></div>
@@ -462,7 +481,7 @@ function exportPDF(){
   document.getElementById('printArea').innerHTML=`
     <div style="font-family:Arial,Helvetica,sans-serif;color:#111;max-width:680px;margin:0 auto;padding:28px">
       <div style="display:flex;align-items:center;gap:10px;border-bottom:3px solid #111;padding-bottom:10px">
-        <div style="width:40px;height:40px;border-radius:50%;background:#c8ff32;display:flex;align-items:center;justify-content:center;font-family:'Arial Black',Arial;font-weight:900;font-size:26px;color:#0b0e13">K</div>
+        <div style="width:40px;height:40px;border-radius:50%;background:#C7F23D;display:flex;align-items:center;justify-content:center;font-family:'Arial Black',Arial;font-weight:900;font-size:26px;color:#0A0B0D">K</div>
         <div style="font-size:28px;font-weight:900;letter-spacing:1px">KOURT <span style="font-weight:700;color:#777;font-size:15px;letter-spacing:3px">PADEL</span></div>
       </div>
       <h2 style="margin:16px 0 2px;text-transform:uppercase;letter-spacing:1px">Final Results</h2>
@@ -553,7 +572,7 @@ function welcomeHTML(){
   const greet = userEmail ? "Welcome back 👋" : "Welcome to KOURT 👋";
   const params = new URLSearchParams(location.search);
   const invited = params.get("invite"), liveJoin = params.get("live");
-  const inviteBanner = (invited||liveJoin) ? `<div class="card" style="max-width:460px;margin:0 auto 12px;border-color:var(--accent);background:rgba(200,255,50,.10)"><div style="font-weight:800">${liveJoin?'🔴 Join the LIVE game!':'🎾 You\'ve been invited to KOURT!'}</div><div class="small muted" style="margin-top:2px">Sign in below to ${liveJoin?'watch it live':'join your crew'}.</div></div>` : "";
+  const inviteBanner = (invited||liveJoin) ? `<div class="card" style="max-width:460px;margin:0 auto 12px;border-color:var(--accent);background:rgba(199,242,61,.10)"><div style="font-weight:800">${liveJoin?'🔴 Join the LIVE game!':'🎾 You\'ve been invited to KOURT!'}</div><div class="small muted" style="margin-top:2px">Sign in below to ${liveJoin?'watch it live':'join your crew'}.</div></div>` : "";
   return `
   <div class="welcome">
     ${inviteBanner}
@@ -592,7 +611,7 @@ function homeHTML(){
   const resume = inProg ? `<div class="card" onclick="goPlay()" style="cursor:pointer;border-color:var(--accent);display:flex;align-items:center;justify-content:space-between;gap:10px">
       <div><div style="font-weight:800">▶ Resume your game</div><div class="small muted">Round ${state.currentRound+1} of ${state.numRounds} · ${state.players.length} players</div></div>
       <span style="color:var(--accent);font-size:22px">→</span></div>` : "";
-  const authBar = authUser ? `<div class="small muted" style="text-align:right;margin-bottom:8px">✅ Signed in as ${esc(authUser.email||"you")} · <span onclick="signOut()" style="color:var(--cyan);cursor:pointer;font-weight:700">Sign out</span></div>` : "";
+  const authBar = authUser ? `<div class="small muted" style="text-align:right;margin-bottom:8px">Signed in as ${esc(authUser.email||"you")} · <span onclick="signOut()" style="color:var(--muted);cursor:pointer;font-weight:700;text-decoration:underline">Sign out</span></div>` : "";
   return `
   ${authBar}
   ${resume}
@@ -602,10 +621,123 @@ function homeHTML(){
     ${t("goView('friends')",'friends','Friends','Partner finder · invite', false)}
     ${t("goView('events')",'events','Events','Parties &amp; socials · soon', true)}
   </div>
-  <a href="/" class="card" style="display:flex;align-items:center;justify-content:space-between;gap:10px;text-decoration:none;color:inherit;border-color:var(--accent);background:rgba(200,255,50,.06)">
-    <div><div style="font-weight:800">👑 KOURT KING</div><div class="small muted">The nationwide padel league — grassroots → glory</div></div>
-    <span style="color:var(--accent);font-size:22px">→</span>
-  </a>`;
+  <div onclick="goView('enter')" class="card kk-enter">
+    <span class="kk-enter-crown">${crownSVG()}</span>
+    <div style="flex:1"><div class="kk-enter-t">Enter the Hunt</div><div class="small muted">Submit your audition for KOURT KING — the crown's up for grabs</div></div>
+    <span class="kk-enter-go">→</span>
+  </div>
+  <a href="/" class="kk-showlink">What's KOURT KING? <span style="color:var(--accent)">→</span></a>`;
+}
+
+/* ---------- Enter the Hunt / audition ---------- */
+function crownSVG(){return '<svg viewBox="0 0 24 22" fill="currentColor" aria-hidden="true"><path d="M3 7L7 11 12 4 17 11 21 7 19.4 19.5 4.6 19.5Z"/></svg>';}
+function upSVG(){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg>';}
+function checkSVG(){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';}
+let _audFile=null;
+function auditionHTML(){
+  const back=`<button class="btn ghost sm" onclick="goHome()">← Home</button>`;
+  return `
+  <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <span class="kk-eyebrow">KOURT KING · The Hunt</span>${back}
+  </div>
+  <div class="card aud-hero">
+    <span class="aud-crown">${crownSVG()}</span>
+    <h2 style="margin:0 0 6px">Enter the Hunt</h2>
+    <p class="small muted" style="margin:0">Record a short audition — show us your padel <i>and</i> your personality. Standouts get cast into the city rounds and filmed for the show. A <b style="color:var(--accent)">six-figure prize</b> and the crown are on the line.</p>
+  </div>
+  <div class="card">
+    <label class="fld">Your name</label>
+    <input id="audName" type="text" placeholder="Your name" autocomplete="name" />
+    <div class="split" style="margin-top:12px">
+      <div><label class="fld">Your city</label><input id="audCity" type="text" placeholder="e.g. London" /></div>
+      <div><label class="fld">Social <span style="text-transform:none;letter-spacing:0;color:var(--muted)">(optional)</span></label><input id="audHandle" type="text" placeholder="@handle" /></div>
+    </div>
+    <label class="fld" style="margin-top:12px">Why should you be Kourt King? <span style="text-transform:none;letter-spacing:0;color:var(--muted)">(optional)</span></label>
+    <input id="audPitch" type="text" placeholder="One line — sell yourself" />
+    <label class="fld" style="margin-top:16px">Your audition video</label>
+    <label class="dropzone" for="audVid">
+      <input id="audVid" type="file" accept="video/*" style="display:none" onchange="onAuditionFile(this)" />
+      <span class="dz-inner" id="audDzInner">
+        <span class="dz-ic">${upSVG()}</span>
+        <span class="dz-t">Tap to record or upload</span>
+        <span class="small muted">Under 60 seconds · MP4 or MOV · up to 150MB</span>
+      </span>
+    </label>
+    <button class="btn primary block lg" id="audSubmit" style="margin-top:16px" onclick="submitAudition()">Submit my audition</button>
+    <div class="progress" id="audProgWrap" style="display:none;margin-top:14px"><div class="bar"><span id="audBar" style="width:0%"></span></div><span class="small muted" id="audPct" style="min-width:40px;text-align:right">0%</span></div>
+    <div id="audStatus" class="small" style="margin-top:10px"></div>
+  </div>
+  <div class="footer" style="margin-top:14px">Your video uploads privately to KOURT · reviewed by the team</div>`;
+}
+function onAuditionFile(el){
+  var f=el.files&&el.files[0], inner=document.getElementById('audDzInner'), st=document.getElementById('audStatus');
+  if(st){st.textContent='';st.style.color='var(--muted)';}
+  if(!f){ _audFile=null; return; }
+  if(!/^video\//.test(f.type||'')){ _audFile=null; if(st){st.style.color='var(--danger)';st.textContent="That's not a video — pick an MP4 or MOV clip.";} return; }
+  var MB=f.size/1048576;
+  if(MB>150){ _audFile=null; if(st){st.style.color='var(--danger)';st.textContent="That clip is "+MB.toFixed(0)+"MB — keep it under 150MB (try a shorter video).";} return; }
+  _audFile=f;
+  if(inner) inner.innerHTML='<span class="dz-ic">'+checkSVG()+'</span><span class="dz-t">'+esc(f.name)+'</span><span class="small muted">'+MB.toFixed(1)+' MB · tap to change</span>';
+}
+async function submitAudition(){
+  var st=document.getElementById('audStatus');
+  var name=(document.getElementById('audName').value||'').trim();
+  var city=(document.getElementById('audCity').value||'').trim();
+  var handle=(document.getElementById('audHandle').value||'').trim();
+  var pitch=(document.getElementById('audPitch').value||'').trim();
+  st.style.color='var(--danger)';
+  if(!name){ st.textContent='Add your name first.'; return; }
+  if(!city){ st.textContent='Which city are you playing out of?'; return; }
+  if(!_audFile){ st.textContent='Add your audition video.'; return; }
+  if(!sb){ st.textContent="Can't reach the server — check your connection."; return; }
+  var btn=document.getElementById('audSubmit'); btn.disabled=true; btn.textContent='Uploading…';
+  document.getElementById('audProgWrap').style.display='flex';
+  st.style.color='var(--muted)'; st.textContent='Uploading your audition — keep this screen open.';
+  try{
+    var ext=((_audFile.name.split('.').pop())||'mp4').toLowerCase().replace(/[^a-z0-9]/g,'').slice(0,5)||'mp4';
+    var uid=(authUser&&authUser.id)||'anon';
+    var path=uid+'/'+Date.now()+'.'+ext;
+    await uploadAudition(_audFile, path, function(p){ var pct=Math.round(p*100); document.getElementById('audBar').style.width=pct+'%'; document.getElementById('audPct').textContent=pct+'%'; });
+    try{ await sb.from('kk_entries').insert({ name:name, city:city, handle:handle, pitch:pitch, video_path:'auditions/'+path, file_name:_audFile.name, file_size:_audFile.size }); }catch(e){}
+    _audFile=null;
+    document.getElementById('app').innerHTML=auditionDoneHTML(name);
+    window.scrollTo(0,0);
+  }catch(e){
+    btn.disabled=false; btn.textContent='Submit my audition';
+    st.style.color='var(--danger)';
+    st.textContent=/404|not.?found|bucket|exist/i.test(e.message||'') ? "Auditions aren't switched on yet — the storage bucket still needs setting up." : ('Upload failed — '+(e.message||'try again')+'.');
+  }
+}
+function uploadAudition(file, path, onProgress){
+  return new Promise(function(resolve,reject){
+    sb.auth.getSession().then(function(r){
+      var token=(r&&r.data&&r.data.session&&r.data.session.access_token)||SUPABASE_ANON_KEY;
+      var xhr=new XMLHttpRequest();
+      xhr.open('POST', SUPABASE_URL+'/storage/v1/object/auditions/'+encodeURI(path));
+      xhr.setRequestHeader('Authorization','Bearer '+token);
+      xhr.setRequestHeader('apikey', SUPABASE_ANON_KEY);
+      xhr.setRequestHeader('x-upsert','true');
+      if(file.type) xhr.setRequestHeader('Content-Type', file.type);
+      xhr.upload.onprogress=function(e){ if(e.lengthComputable&&onProgress) onProgress(e.loaded/e.total); };
+      xhr.onload=function(){ (xhr.status>=200&&xhr.status<300)?resolve():reject(new Error('('+xhr.status+') '+String(xhr.responseText||'upload error').slice(0,140))); };
+      xhr.onerror=function(){ reject(new Error('network error')); };
+      xhr.send(file);
+    }).catch(function(){ reject(new Error('auth error')); });
+  });
+}
+function auditionDoneHTML(name){
+  var first=name?esc(name.split(' ')[0]):'';
+  return `
+  <div class="ch" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <span class="kk-eyebrow">KOURT KING · The Hunt</span>
+  </div>
+  <div class="card aud-hero" style="text-align:center">
+    <span class="aud-crown" style="margin:0 auto 12px">${crownSVG()}</span>
+    <h2 style="margin:0 0 6px">You're in the hunt${first?(', '+first):''}.</h2>
+    <p class="small muted" style="margin:0 auto;max-width:360px">Your audition's locked in. If you've got what it takes, we'll be in touch about the city rounds. Now go climb the leaderboard and prove it.</p>
+    <button class="btn primary block lg" style="margin-top:18px" onclick="goView('stats')">See the leaderboard</button>
+    <button class="btn ghost block" style="margin-top:10px" onclick="goHome()">Back to KOURT</button>
+  </div>`;
 }
 function statsHTML(){
   const {players}=leagueStats();
@@ -782,6 +914,7 @@ function render(){
   if(view==="friends"){ app.innerHTML=friendsHTML(); return; }
   if(view==="events"){ app.innerHTML=eventsHTML(); return; }
   if(view==="home"){ app.innerHTML=homeHTML(); return; }
+  if(view==="enter"){ app.innerHTML=auditionHTML(); return; }
   if(state.phase==="setup") app.innerHTML=setupHTML();
   else if(state.phase==="play") app.innerHTML=playHTML();
   else app.innerHTML=resultsHTML();
