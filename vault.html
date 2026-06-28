@@ -109,9 +109,8 @@
       <div class="pane on" id="pane-creative">
         <div class="screens" id="creativeScreens"></div>
       </div>
-      <div class="pane" id="pane-format"><iframe id="if-format" title="The Format" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
+      <div class="pane" id="pane-format"><div class="screens" id="formatScreens"></div></div>
       <div class="pane" id="pane-invest"><iframe id="if-invest" title="Investment Case" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
-      <div class="vwm" id="vwm"></div>
     </div>
   </div>
 
@@ -127,9 +126,10 @@
 
   document.getElementById("crownHolder").innerHTML='<svg viewBox="0 0 24 22" fill="currentColor" aria-hidden="true"><path d="M3 7L7 11 12 4 17 11 21 7 19.4 19.5 4.6 19.5Z"/></svg>';
 
-  // Creative deck = page images (view-only, no download). Update if the deck's page count changes.
+  // Creative & Format decks = page images (view-only, no download). Update if page counts change.
   const CREATIVE_PAGES=11;
-  const IFRAME_SRC={ format:"vault/format.html", invest:"vault/investment.html" };
+  const FORMAT_PAGES=14;
+  const IFRAME_SRC={ invest:"vault/investment.html" };
   const loaded={};
 
   async function sha256(str){
@@ -155,20 +155,16 @@
     reveal(email);
   }
 
-  function buildWatermark(email){
-    var t=(email+"   ·   CONFIDENTIAL").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="440" height="240"><text x="12" y="130" transform="rotate(-26 12 130)" fill="rgba(255,255,255,0.11)" font-family="Archivo,Arial,sans-serif" font-size="15" font-weight="700">'+t+'</text></svg>';
-    document.getElementById("vwm").style.background='url("data:image/svg+xml;utf8,'+encodeURIComponent(svg)+'") repeat';
+  function pageImgs(dir,n){
+    var html="";
+    for(var i=1;i<=n;i++){ html+='<img src="'+dir+'/p'+String(i).padStart(3,"0")+'.jpg" alt="" draggable="false" loading="lazy">'; }
+    return html+'<div class="endnote">Confidential · do not distribute.</div>';
   }
 
   function reveal(email){
     document.getElementById("gate").style.display="none";
-    // build creative page-image scroll
-    var html="";
-    for(var i=1;i<=CREATIVE_PAGES;i++){ html+='<img src="vault/creative/p'+String(i).padStart(3,"0")+'.jpg" alt="" draggable="false" loading="lazy">'; }
-    html+='<div class="endnote">Confidential · shared with '+email.replace(/</g,"&lt;")+' · do not distribute.</div>';
-    document.getElementById("creativeScreens").innerHTML=html;
-    buildWatermark(email);
+    document.getElementById("creativeScreens").innerHTML=pageImgs("vault/creative",CREATIVE_PAGES);
+    document.getElementById("formatScreens").innerHTML=pageImgs("vault/format",FORMAT_PAGES);
     document.getElementById("docs").style.display="block";
     tab("creative");
     window.scrollTo(0,0);
@@ -180,8 +176,6 @@
     document.querySelectorAll(".tab").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-pane")===name); });
     document.querySelectorAll(".pane").forEach(function(p){ p.classList.remove("on"); });
     document.getElementById("pane-"+name).classList.add("on");
-    // parent watermark only over the creative image pane (the iframe docs carry their own)
-    document.getElementById("vwm").style.display = (name==="creative") ? "block" : "none";
   }
 
   // allow Enter key to submit
