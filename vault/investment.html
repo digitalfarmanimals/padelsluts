@@ -1,0 +1,384 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kourt King — The Investment Case</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Archivo:ital,wght@0,400..800;1,400..800&family=Space+Grotesk:wght@400..700&display=swap');
+:root{--bg:#0A0B0D;--bg2:#101216;--panel:#15181E;--panel2:#1B1F26;--volt:#C7F23D;--gold:#E8B931;--cyan:#43E0FF;--violet:#8A7CFF;--pink:#F45D8C;--white:#F4F6F2;--dim:#9AA1AC;--dim2:#5A616B;--line:rgba(255,255,255,.09);--line2:rgba(255,255,255,.16);}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--white);font-family:'Space Grotesk',sans-serif;line-height:1.55;}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
+section{padding:64px 0;border-bottom:1px solid var(--line);}
+.kick{font-family:'Archivo';font-weight:700;letter-spacing:.3em;text-transform:uppercase;font-size:11px;color:var(--volt);margin-bottom:16px;}
+h2{font-family:'Anton';font-size:40px;line-height:1.02;letter-spacing:.5px;margin-bottom:10px;}
+h2 .v{color:var(--volt);} h2 .g{color:var(--gold);}
+.lead{font-size:16px;color:#cdd2cb;max-width:780px;margin-bottom:30px;}
+.mono{width:36px;height:36px;border-radius:8px;background:var(--volt);color:#0A0B0D;font-family:'Anton';display:inline-flex;align-items:center;justify-content:center;font-size:21px;}
+.wm{font-family:'Archivo';font-weight:800;font-style:italic;letter-spacing:.12em;font-size:18px;}.wm b{color:var(--volt);}
+/* HERO */
+.hero{padding:80px 0 64px;text-align:left;background:radial-gradient(1100px 600px at 75% -10%,#181c12 0%,var(--bg) 60%);}
+.hero h1{font-family:'Anton';font-size:74px;line-height:.95;letter-spacing:1px;margin:26px 0 14px;}
+.hero h1 .v{color:var(--volt);}
+.hero .sub{font-size:19px;color:#cdd2cb;max-width:720px;}
+.pill{display:inline-block;border:1px solid var(--line2);border-radius:100px;padding:7px 16px;font-family:'Archivo';font-weight:600;letter-spacing:.14em;text-transform:uppercase;font-size:11px;color:var(--dim);margin-top:26px;}
+/* generic */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;}
+.card.hl{border-color:var(--volt);}
+.stat{font-family:'Anton';font-size:42px;line-height:1;}
+.stat.v{color:var(--volt);}.stat.g{color:var(--gold);}.stat.c{color:var(--cyan);}
+.statlab{font-size:13px;color:var(--dim);margin-top:8px;}
+.src{font-size:11px;color:var(--dim2);margin-top:10px;font-style:italic;}
+.row{display:flex;gap:10px;align-items:center;}
+table{width:100%;border-collapse:collapse;font-size:14px;}
+th,td{text-align:left;padding:12px 12px;border-bottom:1px solid var(--line);}
+th{font-family:'Archivo';font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:11px;color:var(--dim);}
+td b{color:var(--white);} td .v{color:var(--volt);font-weight:600;}
+.tag{display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--dim);margin:2px 3px 2px 0;}
+/* model */
+.scn{display:inline-flex;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:5px;margin-bottom:22px;}
+.scn button{font-family:'Archivo';font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:12px;padding:10px 18px;border:0;border-radius:8px;background:transparent;color:var(--dim);cursor:pointer;transition:.15s;}
+.scn button.on{background:var(--volt);color:#0A0B0D;}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.kpi{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;padding:18px;}
+.kpi.hero2{border-color:var(--volt);box-shadow:0 0 36px rgba(199,242,61,.10);}
+.kpi .lab{font-family:'Archivo';font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:10px;color:var(--dim);}
+.kpi .val{font-family:'Anton';font-size:40px;line-height:1;margin-top:9px;}
+.kpi .val.v{color:var(--volt);}.kpi .val.g{color:var(--gold);}
+.kpi .meta{font-size:11.5px;color:var(--dim);margin-top:6px;}
+.modelgrid{display:grid;grid-template-columns:320px 1fr;gap:16px;}
+.sld{margin-bottom:14px;}.sld .r{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;}
+.sld .n{font-size:12px;color:var(--white);}.sld .vv{font-family:'Anton';font-size:16px;color:var(--volt);}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:5px;background:var(--panel2);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--volt);cursor:pointer;border:3px solid #0A0B0D;box-shadow:0 0 0 1px var(--volt);}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:6px;}
+.legend span{font-size:11px;color:var(--dim);display:inline-flex;align-items:center;gap:5px;}
+.dot{width:9px;height:9px;border-radius:2px;display:inline-block;}
+svg{width:100%;display:block;overflow:visible;}.bx{transition:height .5s cubic-bezier(.2,.7,.2,1),y .5s cubic-bezier(.2,.7,.2,1);}
+.ylab{fill:var(--dim);font-size:10px;}.axlab{fill:var(--dim2);font-size:11px;}.barval{fill:var(--white);font-size:11px;font-family:'Anton';}
+/* roadmap */
+.road{position:relative;padding-left:28px;}
+.road:before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:linear-gradient(180deg,var(--volt),var(--dim2));}
+.phase{position:relative;margin-bottom:22px;}
+.phase:before{content:'';position:absolute;left:-26px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--volt);box-shadow:0 0 0 4px rgba(199,242,61,.15);}
+.phase h4{font-family:'Anton';font-size:20px;margin-bottom:4px;}
+.phase .yr{font-family:'Archivo';font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:11px;color:var(--volt);}
+.phase p{font-size:14px;color:#cdd2cb;margin-top:5px;}
+.note{font-size:12px;color:var(--dim2);margin-top:16px;line-height:1.6;}
+.foot{padding:40px 0 70px;color:var(--dim2);font-size:12px;text-align:center;}
+@media(max-width:880px){.grid2,.grid3,.grid4,.modelgrid,.kpis{grid-template-columns:1fr 1fr}.hero h1{font-size:46px}h2{font-size:30px}.modelgrid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<div id="kkwm" style="position:fixed;inset:0;pointer-events:none;z-index:2147483600"></div>
+<script>
+(function(){var e=null;try{e=localStorage.getItem("kk_vault_email");}catch(x){}if(!e){if(window.top===window.self){location.replace("/vault.html");}return;}var t=(e+"   ·   CONFIDENTIAL").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");var s='<svg xmlns="http://www.w3.org/2000/svg" width="440" height="240"><text x="12" y="130" transform="rotate(-26 12 130)" fill="rgba(255,255,255,0.10)" font-family="Archivo,Arial,sans-serif" font-size="15" font-weight="700">'+t+'</text></svg>';var w=document.getElementById("kkwm");if(w)w.style.background='url("data:image/svg+xml;utf8,'+encodeURIComponent(s)+'") repeat';document.addEventListener("contextmenu",function(ev){ev.preventDefault();return false;});})();
+</script>
+
+<div class="wrap">
+
+<!-- HERO -->
+<div class="hero">
+ <div class="row" style="gap:11px;"><div class="mono">K</div><div class="wm">KOURT<b>KING</b></div></div>
+ <div class="kick" style="margin-top:30px;">The Investment Case · 2026 · Confidential</div>
+ <h1>KOURT <span class="v">KING.</span></h1>
+ <div style="font-size:20px;color:var(--white);font-weight:600;margin:14px 0 4px;">Britain's first creator-era padel competition — built to become the world's biggest.</div>
+ <div style="font-family:'Archivo';font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:13px;color:var(--gold);margin:26px 0 4px;">The vision</div>
+ <div style="font-family:'Anton';font-size:34px;line-height:1;letter-spacing:.5px;margin-bottom:12px;">Become the home of <span class="v">padel media.</span></div>
+ <div class="sub" style="font-size:17px;">Win the audience with the show. Keep it forever with the platform. Starting in Britain — built for the world.</div>
+ <div class="pill">35M+ players · 150 countries · fastest-growing sport on earth</div>
+</div>
+
+<!-- THESIS -->
+<section>
+ <div class="kick">The thesis</div>
+ <h2>A sport exploding — with <span class="v">no media home.</span></h2>
+ <p class="lead">Premier Padel owns the elite tour. Playtomic owns booking. Clubs own courts. But the <b>media layer</b> — the YouTube-native home where the sport is watched, followed and lived — is wide open. We take it the way Kings League and Baller League took football: characters, drama, and a format built for the feed. Then we keep the audience on a platform they own a place in.</p>
+ <div class="grid3">
+  <div class="card"><div class="stat v">£0</div><div class="statlab">spent acquiring the audience — the show <b>is</b> the marketing</div></div>
+  <div class="card"><div class="stat v">2</div><div class="statlab">businesses: media engine (fast money) + platform (durable, high-multiple)</div></div>
+  <div class="card"><div class="stat v">1</div><div class="statlab">open lane: nobody owns padel's media &amp; community layer — yet</div></div>
+ </div>
+</section>
+
+<!-- MARKET -->
+<section>
+ <div class="kick">The market · the facts</div>
+ <h2>Padel is the <span class="v">fastest-growing sport in the world.</span></h2>
+ <p class="lead">Not hype — the FIP World Padel Report 2025 and Playtomic/PwC data. The category is big, young, global and compounding.</p>
+ <div class="grid4">
+  <div class="card"><div class="stat v">35M+</div><div class="statlab">players worldwide, up from ~8M in 2018</div><div class="src">FIP World Padel Report 2025</div></div>
+  <div class="card"><div class="stat v">150</div><div class="statlab">nations playing — up from ~50 in 2019</div><div class="src">FIP 2025</div></div>
+  <div class="card"><div class="stat v">77,300</div><div class="statlab">courts, +15% in a year (14,355 built in one cycle)</div><div class="src">FIP 2025</div></div>
+  <div class="card"><div class="stat v">92%</div><div class="statlab">of players return after their first game — rare stickiness</div><div class="src">Playtomic/PwC 2025</div></div>
+ </div>
+ <div style="height:14px;"></div>
+ <div class="grid2">
+  <div class="card hl">
+   <div class="kick" style="color:var(--gold);">The UK — where we start</div>
+   <table>
+    <tr><td>UK players (2025)</td><td class="v">860,000 — <b>2× the prior year</b></td></tr>
+    <tr><td>UK players (2019)</td><td>15,000</td></tr>
+    <tr><td>UK courts (end 2025)</td><td>1,553 across 559 venues</td></tr>
+    <tr><td>Value per court</td><td class="v">#1 in the world (+74% on 2023)</td></tr>
+    <tr><td>Adult awareness</td><td>43% — ~23M people</td></tr>
+   </table>
+   <div class="src">LTA / FIP / Playtomic-PwC 2025. We start in the market with the best unit economics on earth.</div>
+  </div>
+  <div class="card">
+   <div class="kick">The money is already pouring in</div>
+   <table>
+    <tr><td>Playtomic (booking platform)</td><td class="v">~€250M valuation; €110M+ raised</td></tr>
+    <tr><td>Kings League (creator football)</td><td class="v">$160M+ raised</td></tr>
+    <tr><td>Pro Padel League (US)</td><td>$25M raised ($10M seed + $15M A)</td></tr>
+    <tr><td>Nox (rackets)</td><td>Oakley Capital majority stake</td></tr>
+    <tr><td>US courts: 2020 → 2025</td><td><b>&lt;30 → 1,000+</b> (20,000 by 2030 est.)</td></tr>
+   </table>
+   <div class="src">Crowdcube, PitchBook, PBM, TrustPadel 2025-26. Padel is the hottest funded vertical in sport.</div>
+  </div>
+ </div>
+</section>
+
+<!-- COMPARABLES -->
+<section>
+ <div class="kick">Proof it works · other sports, same playbook</div>
+ <h2>The model is <span class="v">already proven</span> — twice over.</h2>
+ <p class="lead">We're not inventing anything. <b>Hyrox</b> proves people will pay to <b>play</b> a standardised format (the platform half). <b>Kings League &amp; Baller League</b> prove creator-era formats win huge audiences to <b>watch</b> (the show half). Kourt King is both — for the world's fastest-growing sport.</p>
+
+ <div class="card hl" style="margin-bottom:16px;border-color:var(--gold);">
+  <div class="row" style="justify-content:space-between;align-items:center;"><b style="font-size:19px;">Hyrox <span style="color:var(--gold);">— the lead comp</span></b><span class="tag">fitness · own-the-format · play it yourself</span></div>
+  <p style="font-size:14px;color:#cdd2cb;margin:8px 0 14px;">A standardised fitness race (same format everywhere, so everyone compares times globally). The closest thing to our model: own a format, and the format itself becomes the product people <b>play</b> — the engine, not the spectacle.</p>
+  <div class="grid4">
+   <div><div class="stat g">£40m→£140m</div><div class="statlab">revenue in a single year — PE investment (L Catterton) reportedly imminent</div></div>
+   <div><div class="stat g">1.5m</div><div class="statlab">athletes 2025/26, up from 570k the year before (650 in 2017)</div></div>
+   <div><div class="stat g">55-65%</div><div class="statlab">of revenue from entries/participation — <b>playing</b> is the business</div></div>
+   <div><div class="stat g">~33</div><div class="statlab">avg age, even gender split, spends hundreds/yr — <b>our demographic</b></div></div>
+  </div>
+  <div class="src" style="margin-top:12px;">SportsPro, CNBC, Marketing Brew 2025-26. Grassroots-feeds-ecosystem is their explicit strategy (gym partnerships: Orangetheory, F45, Peloton) — exactly our mini-league loop, swap gyms for padel clubs. Sponsors: Puma, Red Bull, MyProtein, Centr.</div>
+ </div>
+
+ <div class="grid2">
+  <div class="card hl">
+   <div class="row" style="justify-content:space-between;"><b style="font-size:17px;">Kings League</b><span class="tag">football · the watch half</span></div>
+   <table>
+    <tr><td>Revenue from sponsorship</td><td class="v">~65-70%</td></tr>
+    <tr><td>Profitability</td><td class="v">profitable since day one</td></tr>
+    <tr><td>2025 engagement</td><td>150M livestream hrs · 13bn impressions</td></tr>
+    <tr><td>Total raised</td><td class="v">$160M+ (incl. $63M, Feb 2026)</td></tr>
+    <tr><td>Markets</td><td>10+ countries in &lt;3 yrs</td></tr>
+   </table>
+   <div class="src">SportsPro, SGI Europe, PitchBook 2024-26</div>
+  </div>
+  <div class="card hl">
+   <div class="row" style="justify-content:space-between;"><b style="font-size:17px;">Baller League</b><span class="tag">football · the watch half</span></div>
+   <table>
+    <tr><td>UK Season 1 peak</td><td class="v">220K concurrent · ~2M/day avg</td></tr>
+    <tr><td>UK final</td><td class="v">sold out the O2 Arena</td></tr>
+    <tr><td>Broadcast / deals</td><td>Sky Sports · Nike (3-country kit)</td></tr>
+    <tr><td>Commercial agency</td><td>TEAM (built the Champions League)</td></tr>
+    <tr><td>US launch (Miami, 2026)</td><td class="v">173K peak on opening day</td></tr>
+   </table>
+   <div class="src">Inside World Football, Streams Charts, Sportcal 2025-26</div>
+  </div>
+ </div>
+ <div class="note"><b style="color:var(--white);">The whole picture:</b> Hyrox proves the <b>play</b> (a format people pay to compete in — heading to a hundreds-of-millions exit). Kings/Baller prove the <b>watch</b> (creator formats win massive audiences, UK→US). <b style="color:var(--volt);">Kourt King is the first to do both, in padel</b> — the watch half acquires the audience for free, the play half (mini-leagues + The 20) keeps them forever. No one owns this in padel yet.</div>
+</section>
+
+<!-- THE MODEL -->
+<section>
+ <div class="kick">The numbers · live model</div>
+ <h2>The model. <span class="v">Drag any lever.</span></h2>
+ <p class="lead">Built bottom-up on the benchmarks above — Kings League's revenue mix, real YouTube RPM, padel's growth. Two views: <b>UK Target</b> (what this raise delivers) and <b>Global</b> (the home-of-padel-media path). Both win — no failure cases, just floor and ceiling.</p>
+ <div class="scn">
+  <button id="bUK" class="on" onclick="setS('uk')">UK Target</button>
+  <button id="bGl" onclick="setS('global')">Global · Home of Padel Media</button>
+ </div>
+ <div class="kpis">
+  <div class="kpi"><div class="lab">Revenue · Y5</div><div class="val" id="kRev">£0</div><div class="meta" id="kRevM"></div></div>
+  <div class="kpi"><div class="lab">EBITDA · Y5</div><div class="val v" id="kEb">£0</div><div class="meta" id="kEbM"></div></div>
+  <div class="kpi hero2"><div class="lab">Enterprise Value</div><div class="val g" id="kEv">£0</div><div class="meta">Year-5 exit · sum-of-parts</div></div>
+  <div class="kpi hero2"><div class="lab">Investor Return</div><div class="val v" id="kRet">0×</div><div class="meta">on £1.7m for 20%</div></div>
+ </div>
+ <div class="modelgrid">
+  <div class="card"><div class="kick" style="margin-bottom:14px;">The levers</div><div id="sliders"></div>
+   <div class="note">Defaults are defensible placeholders from the benchmarks above. Swap in real numbers (pilot views, sponsor quotes) as they land.</div></div>
+  <div style="display:flex;flex-direction:column;gap:16px;">
+   <div class="card"><div class="kick" style="margin-bottom:10px;">Revenue ramp · £000s</div>
+    <div class="legend"><span><i class="dot" style="background:#43E0FF"></i>Ad/content</span><span><i class="dot" style="background:#C7F23D"></i>Sponsorship</span><span><i class="dot" style="background:#E8B931"></i>Tickets</span><span><i class="dot" style="background:#8A7CFF"></i>Merch</span><span><i class="dot" style="background:#F45D8C"></i>Platform</span></div>
+    <svg id="revChart" viewBox="0 0 720 280"></svg></div>
+   <div class="card"><div class="kick" style="margin-bottom:10px;">Profit · EBITDA £000s</div><svg id="ebChart" viewBox="0 0 720 170"></svg></div>
+  </div>
+ </div>
+ <div class="note" id="mixNote"></div>
+</section>
+
+<!-- THE PLATFORM -->
+<section>
+ <div class="kick">The platform · the durable asset</div>
+ <h2>Watch it Sunday. <span class="v">Play it Tuesday.</span></h2>
+ <p class="lead">The show makes padel must-watch. The platform lets every viewer <b>play the exact game they saw on TV</b> — The 20 — in mini-leagues with their mates, ranked nationally. We don't book courts or fight Playtomic. We own the <b>format, the competition and the data</b> that sits on top.</p>
+ <div class="grid3">
+  <div class="card hl"><div class="kick">Play the format</div><p style="font-size:14px;color:#cdd2cb;margin-top:8px;">The 20 isn't just the show's format — it's what you play. The show teaches the game; the platform is where the nation plays it. A loop nobody else has.</p></div>
+  <div class="card hl"><div class="kick">Join mini-leagues</div><p style="font-size:14px;color:#cdd2cb;margin-top:8px;">Local, club and friend leagues running The 20 — standings, rounds, weekly drama. Recurring, social, sticky. The reason people come back every week.</p></div>
+  <div class="card hl"><div class="kick">Get rated · climb</div><p style="font-size:14px;color:#cdd2cb;margin-top:8px;">Every league game feeds your rating and the national leaderboard — the official ranking of every player, and the data moat underneath it all.</p></div>
+ </div>
+ <div style="height:14px;"></div>
+ <div class="card">
+  <div class="kick">The comp that proves the value · Playtomic</div>
+  <div class="grid4" style="margin-top:14px;">
+   <div><div class="stat c">~€250m</div><div class="statlab">Playtomic valuation</div></div>
+   <div><div class="stat c">~€29m</div><div class="statlab">net revenue (+38% y/y)</div></div>
+   <div><div class="stat c">~8-9×</div><div class="statlab">revenue multiple — software, not media</div></div>
+   <div><div class="stat c">4.7m</div><div class="statlab">players · 6,000 clubs · 66 countries</div></div>
+  </div>
+  <div class="src" style="margin-top:12px;">Crowdcube / PBM 2025. Playtomic is the <b style="color:var(--white);">booking</b> layer of padel, valued like software. We're the <b style="color:var(--white);">competition &amp; media</b> layer — we sit on top, partner for booking, and earn the same kind of multiple on a stickier, format-owned product. The platform is why this is a tech valuation, not just a media one.</div>
+ </div>
+</section>
+
+<!-- SEASON BY SEASON -->
+<section>
+ <div class="kick">Season by season · the working</div>
+ <h2>Where <span class="v">every pound</span> comes from.</h2>
+ <p class="lead">The best achievable case, shown line by line — each number tied to a benchmark above. Optimistic, but built to be defended. Figures in £000s.</p>
+ <div style="overflow-x:auto;">
+ <table style="min-width:680px;">
+  <tr><th>Revenue stream</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th></tr>
+  <tr><td><b>Title sponsor</b> <span style="color:var(--dim2);font-size:11px;">£600k +35%/yr</span></td><td>600</td><td>810</td><td>1,094</td><td>1,476</td><td class="v">1,993</td></tr>
+  <tr><td><b>Secondary sponsors</b> <span style="color:var(--dim2);font-size:11px;">+40%/yr</span></td><td>320</td><td>448</td><td>627</td><td>878</td><td class="v">1,229</td></tr>
+  <tr><td><b>Ad / content</b> <span style="color:var(--dim2);font-size:11px;">views × £3.50 RPM</span></td><td>84</td><td>149</td><td>266</td><td>472</td><td class="v">840</td></tr>
+  <tr><td><b>Live tickets</b> <span style="color:var(--dim2);font-size:11px;">4,500 × £48 × 92%</span></td><td>199</td><td>248</td><td>298</td><td>348</td><td class="v">397</td></tr>
+  <tr><td><b>Merch</b> <span style="color:var(--dim2);font-size:11px;">users × 6% × £42 × 42%</span></td><td>85</td><td>151</td><td>268</td><td>476</td><td class="v">847</td></tr>
+  <tr><td><b>Mini-league subs</b> <span style="color:var(--dim2);font-size:11px;">play The 20 in leagues</span></td><td>134</td><td>239</td><td>425</td><td>756</td><td class="v">1,344</td></tr>
+  <tr><td><b>Club leagues (B2B)</b> <span style="color:var(--dim2);font-size:11px;">clubs run leagues on us</span></td><td>65</td><td>130</td><td>194</td><td>259</td><td class="v">324</td></tr>
+  <tr><td><b>Marketplace cut</b></td><td>22</td><td>44</td><td>66</td><td>88</td><td class="v">110</td></tr>
+  <tr><td><b>Format licensing</b> <span style="color:var(--dim2);font-size:11px;">territories × £240k</span></td><td>0</td><td>240</td><td>480</td><td>720</td><td class="v">960</td></tr>
+  <tr style="border-top:2px solid var(--volt);"><td><b style="color:var(--white);">TOTAL REVENUE</b></td><td><b>1,509</b></td><td><b>2,459</b></td><td><b>3,718</b></td><td><b>5,474</b></td><td><b class="v">8,044</b></td></tr>
+  <tr><td>Total costs</td><td>1,560</td><td>1,862</td><td>2,223</td><td>2,656</td><td>3,174</td></tr>
+  <tr style="border-bottom:none;"><td><b style="color:var(--white);">EBITDA</b></td><td>(51)</td><td><b class="v">597</b></td><td><b class="v">1,494</b></td><td><b class="v">2,818</b></td><td><b class="v">4,871</b></td></tr>
+  <tr style="border-top:none;"><td><span style="color:var(--dim);font-size:12px;">EBITDA margin</span></td><td><span style="color:var(--dim);font-size:12px;">—</span></td><td><span style="color:var(--dim);font-size:12px;">24%</span></td><td><span style="color:var(--dim);font-size:12px;">40%</span></td><td><span style="color:var(--dim);font-size:12px;">51%</span></td><td><span style="color:var(--dim);font-size:12px;">61%</span></td></tr>
+ </table>
+ </div>
+ <div class="grid4" style="margin-top:18px;">
+  <div class="card hl"><div class="stat v">£8.0m</div><div class="statlab">Season 5 revenue</div></div>
+  <div class="card hl"><div class="stat v">S2</div><div class="statlab">profitable &amp; self-funding from here</div></div>
+  <div class="card hl"><div class="stat g">£47m</div><div class="statlab">enterprise value at exit</div></div>
+  <div class="card hl"><div class="stat g">5.6×</div><div class="statlab">investor return on £1.7m</div></div>
+ </div>
+ <div class="note"><b style="color:var(--white);">What has to go right:</b> the title sponsor (£600k Y1 — the biggest swing, but Baller League landed Nike + Sky in season one); views scaling to 240m (a hit, proven by the pilot); 4% platform conversion (Strava-level). All benchmarked, all targets — the pilot turns them from projected to proven.</div>
+</section>
+
+<!-- CONTENT AS AN ASSET -->
+<section>
+ <div class="kick">Content as an asset · the balance sheet</div>
+ <h2>An owned library that <span class="g">compounds every season.</span></h2>
+ <p class="lead">Beyond the P&amp;L, every season builds a permanent, owned asset. Funds value content libraries at <b>5-10× their annual licensing revenue</b> — and ours grows every year at near-zero marginal cost, because the footage already exists.</p>
+ <div class="grid3">
+  <div class="card hl">
+   <div class="kick">1 · The content library</div>
+   <div class="stat g" style="margin-top:8px;">£9-18m</div>
+   <div class="statlab">illustrative asset value by Season 5 — content + format revenue (~£1.8m) at the standard 5-10× library multiple. Compounds every season.</div>
+   <div class="src">Rule of thumb: libraries valued at 5-10× annual net licensing revenue (DealStream)</div>
+  </div>
+  <div class="card hl">
+   <div class="kick">2 · The format IP</div>
+   <div class="stat g" style="margin-top:8px;">+20-50%</div>
+   <div class="statlab">franchise premium on top of standard multiples. "The 20" and the Kourt King format generate <b>new</b> works in every territory — like MasterChef or Kings League.</div>
+   <div class="src">Strong format/brand lifts valuation 20-50% (DealStream rules of thumb)</div>
+  </div>
+  <div class="card hl">
+   <div class="kick">3 · The strategic premium</div>
+   <div class="stat g" style="margin-top:8px;">The prize</div>
+   <div class="statlab">funds value content on what it does for the platform — acquiring &amp; retaining users. An owned, branded audience a buyer can't reach elsewhere commands a premium.</div>
+   <div class="src">Content valued on customer acquisition &amp; churn prevention (SymphonyAI)</div>
+  </div>
+ </div>
+ <div class="note"><b style="color:var(--white);">The one rule that protects all of it:</b> a library is only worth the rights you <i>retain</i>. Give territories or windows away to a broadcaster for early reach and you give the value away with them. <b style="color:var(--volt);">We own the footage, the format and the brand outright</b> — which is exactly why the IP must sit in a company we control, licensed into the venture, not handed up to a partner. The library value sits largely within the enterprise value above; this is the tangible, financeable asset underneath the P&amp;L.</div>
+</section>
+
+<!-- HOW IT MONETISES -->
+<section>
+ <div class="kick">How it makes money · 8 streams</div>
+ <h2>Eight ways to <span class="v">win.</span></h2>
+ <div class="grid4">
+  <div class="card"><b>1 · Sponsorship</b><p style="font-size:13px;color:#cdd2cb;margin-top:6px;">Title + secondary + per-city. The biggest, earliest line — Kings League proves ~65-70% of revenue.</p></div>
+  <div class="card"><b>2 · Ad / content</b><p style="font-size:13px;color:#cdd2cb;margin-top:6px;">YouTube + social at Tier-1 RPMs (~£2-4/1k views), scaling with a global audience.</p></div>
+  <div class="card"><b>3 · Live / tickets</b><p style="font-size:13px;color:#cdd2cb;margin-top:6px;">Ticketed arena finals — Baller League sold out the O2 in season one.</p></div>
+  <div class="card"><b>4 · Merch</b><p style="font-size:13px;color:#cdd2cb;margin-top:6px;">A tribe brand — crown, gold, "earned." High-margin, fan-driven.</p></div>
+  <div class="card"><b>5 · Mini-league subs</b><p style="font-size:13px;color:#cdd2cb;margin-top:6px;">Play the game you watched on TV — The 20 — in leagues with mates. Recurring, sticky, software-margin.</p></div>
+  <div class="card"><b>6 · Club leagues (B2B)</b><p style="font-size:13px;color:#cdd2cb;margin-top:6px;">Clubs run Kourt King mini-leagues for members on our platform. Playtomic proves the multiple (~€250M).</p></div>
+  <div class="card"><b>7 · Format licensing</b><p style="font-size:13px;color:#cdd2cb;margin-top:6px;">License the show territory-by-territory. Capital-light, high-margin.</p></div>
+  <div class="card"><b>8 · Data &amp; rating</b><p style="font-size:13px;color:#cdd2cb;margin-top:6px;">The official rating + match data of the sport. The strategic crown jewel.</p></div>
+ </div>
+</section>
+
+<!-- ROADMAP -->
+<section>
+ <div class="kick">The roadmap</div>
+ <h2>Britain first. <span class="v">Then the world.</span></h2>
+ <p class="lead">Win locally, prove the model, export the format, scale the platform globally. Operate the high-upside markets; license the mature ones.</p>
+ <div class="road">
+  <div class="phase"><div class="yr">Year 1 · Now</div><h4>Britain — prove it</h4><p>Film the pilot, run the first city qualifiers, launch the platform (casting, rating, leaderboard, clips). Best unit economics on earth; build the UK audience. <b>The raise funds this.</b></p></div>
+  <div class="phase"><div class="yr">Year 2</div><h4>Britain scale + USA entry</h4><p>Full UK season, national final at an arena. Open the USA — biggest upside, English content travels, creator-native, demand outstrips courts. Platform goes global (anyone can play The 20, get rated).</p></div>
+  <div class="phase"><div class="yr">Year 3</div><h4>France &amp; Germany</h4><p>The fastest-growing near-Europe markets alongside the UK. Licensed shows begin. Platform compounds across territories; data moat deepens.</p></div>
+  <div class="phase"><div class="yr">Years 4-5</div><h4>License the rest · become the home</h4><p>License into mature padel cultures (Spain, Italy, Sweden) and capital-rich Gulf markets. The platform is now the global home of padel media — the channel, the community, the rating, the data. <b>£100m+ shape.</b></p></div>
+ </div>
+</section>
+
+<!-- 100M PATH -->
+<section>
+ <div class="kick">The £100m+ path</div>
+ <h2>From a show to the <span class="g">infrastructure of a sport.</span></h2>
+ <p class="lead">A show is valued on its audience (media multiples). A platform that owns the audience, the rating and the data of a global sport is valued like infrastructure (software/data multiples, on a global base). That gap is the £100m+ opportunity.</p>
+ <div class="grid3">
+  <div class="card"><div class="stat g">Own</div><div class="statlab" style="margin-top:10px;">the <b>official rating &amp; ranking</b> of every padel player — the number everyone checks. PlaySight is already putting ratings into padel broadcasts; we own ours.</div></div>
+  <div class="card"><div class="stat g">Own</div><div class="statlab" style="margin-top:10px;">the <b>data layer</b> — every game logged, every player tracked. The crown jewel an acquirer pays a premium for, beyond any P&amp;L.</div></div>
+  <div class="card"><div class="stat g">Own</div><div class="statlab" style="margin-top:10px;">the <b>audience &amp; culture</b> — a young, padel-obsessed community a broadcaster, brand or data buyer can't otherwise reach.</div></div>
+ </div>
+ <div class="note">Credible acquirers: a sports/media group (DAZN, a streamer) buying an owned young audience; a padel consolidator (Playtomic, a brand like Adidas/Babolat) buying the rating/data/community; or — later, carefully — a data/betting company for which the official rating is strategically essential. <b style="color:var(--white);">£100m+ is the earned outcome of owning the media layer first.</b></div>
+</section>
+
+<!-- THE ASK -->
+<section style="border-bottom:none;">
+ <div class="kick">The ask</div>
+ <h2>£1.7M for 20%. <span class="v">The home of padel media.</span></h2>
+ <div class="grid4">
+  <div class="card hl"><div class="stat v">£1.7M</div><div class="statlab">raise · funds the pilot, first season &amp; platform</div></div>
+  <div class="card hl"><div class="stat v">20%</div><div class="statlab">equity · £8.5M post-money</div></div>
+  <div class="card"><div class="stat">Yr 2</div><div class="statlab">target breakeven</div></div>
+  <div class="card"><div class="stat g">£34M+</div><div class="statlab">UK Target EV — global path multiples higher</div></div>
+ </div>
+ <div class="note">Founder: Nick Gale (Digital Farm Animals) — hit songwriter/producer (Dua Lipa, KSI, Galantis, Rita Ora), with the network, creative track record and brand instinct to build a culture brand. The model above is illustrative and assumption-driven; figures update as real data (pilot, sponsors) lands.</div>
+</section>
+
+<div class="foot">kourt.co.uk · Confidential · Prepared as an investment case. Please don't share or distribute without permission.<br>Market data: FIP World Padel Report 2025, Playtomic/PwC Global Padel Report. Comparables: SportsPro, SGI Europe, Streams Charts, Inside World Football, Crowdcube, PitchBook (2024-26).</div>
+</div>
+
+<script>
+const P_UK={gviews5:180,gvfrac:0.09,rpm:3.5,gusers5:650,gufrac:0.09,conv:0.04,arpu:42,title1:500,titleG:0.35,sec1:280,secG:0.40,seats:4000,price:45,sell:0.90,events5:2,merchPct:0.06,merchSpend:40,merchMargin:0.42,clubs5:140,clubFee:150,mkt5:90,terr5:0,licFee:0,prod:450,prize:100,tech:240,team:350,mktg:150,oh:100,costG:0.20,platMult:9,mediaMult:3.5};
+const P_GL={gviews5:650,gvfrac:0.06,rpm:3.5,gusers5:1800,gufrac:0.05,conv:0.04,arpu:42,title1:550,titleG:0.40,sec1:320,secG:0.45,seats:5000,price:50,sell:0.92,events5:3,merchPct:0.06,merchSpend:42,merchMargin:0.43,clubs5:450,clubFee:150,mkt5:160,terr5:6,licFee:260,prod:600,prize:100,tech:380,team:480,mktg:280,oh:160,costG:0.22,platMult:11,mediaMult:4.5};
+let P=Object.assign({},P_UK), MODE='uk';
+const SL=[{k:'gviews5',n:'Views · Y5 (m)',min:40,max:900,step:10,f:v=>v+'m'},{k:'rpm',n:'YouTube RPM (£/1k)',min:1.5,max:6,step:.1,f:v=>'£'+v.toFixed(1)},{k:'title1',n:'Title sponsor · Y1 (£k)',min:100,max:1200,step:25,f:v=>'£'+v+'k'},{k:'gusers5',n:'Platform users · Y5 (k)',min:100,max:3000,step:50,f:v=>v+'k'},{k:'conv',n:'Paying conversion %',min:.01,max:.08,step:.005,f:v=>(v*100).toFixed(1)+'%'},{k:'arpu',n:'Rev / paying user (£/yr)',min:20,max:60,step:1,f:v=>'£'+v},{k:'terr5',n:'Licensed territories · Y5',min:0,max:12,step:1,f:v=>v},{k:'platMult',n:'Platform exit multiple',min:4,max:14,step:.5,f:v=>v.toFixed(1)+'×'}];
+function calc(p){const Y=[0,1,2,3,4];const rmp=(v5,f)=>Y.map(i=>v5*f*Math.pow(1/f,i/4));const gv=rmp(p.gviews5,p.gvfrac),gu=rmp(p.gusers5,p.gufrac);
+ const ad=Y.map(i=>gv[i]*p.rpm),title=Y.map(i=>p.title1*Math.pow(1+p.titleG,i)),sec=Y.map(i=>p.sec1*Math.pow(1+p.secG,i));
+ const tick=Y.map(i=>p.seats*p.price*p.sell*(1+(p.events5-1)*i/4)/1000),merch=Y.map(i=>gu[i]*p.merchPct*p.merchSpend*p.merchMargin),free=Y.map(i=>gu[i]*p.conv*p.arpu);
+ const clubs=Y.map(i=>(p.clubs5*(i+1)/5)*p.clubFee*12/1000),mkt=Y.map(i=>p.mkt5*(i+1)/5),lic=Y.map(i=>(i+1)<2?0:p.terr5*((i+1-1)/4)*p.licFee);
+ const spon=Y.map(i=>title[i]+sec[i]),plat=Y.map(i=>free[i]+clubs[i]+mkt[i]+lic[i]),rev=Y.map(i=>ad[i]+spon[i]+tick[i]+merch[i]+plat[i]);
+ const costs=Y.map(i=>p.prod*Math.pow(1+p.costG,i)+p.prize*Math.pow(1+p.costG/2,i)+p.tech*Math.pow(1+p.costG,i)+p.team*Math.pow(1+p.costG,i)+p.mktg*Math.pow(1+p.costG,i)+p.oh*Math.pow(1+p.costG,i));
+ const eb=Y.map(i=>rev[i]-costs[i]);const mediaRev5=ad[4]+spon[4]+tick[4]+merch[4],platRev5=plat[4];const EV=mediaRev5*p.mediaMult+platRev5*p.platMult,ret=(EV*0.20)/1700;
+ let cum=0,be=0;for(let i=0;i<5;i++){cum+=eb[i];if(cum>0){be=i+1;break;}}return{Y,ad,spon,tick,merch,plat,rev,eb,EV:EV/1000,ret,platPct:platRev5/rev[4],be};}
+function money(k){if(k>=1000)return '£'+(k/1000).toFixed(k>=10000?0:1)+'m';return '£'+Math.round(k)+'k';}
+function av(el,to,fmt){const from=el._c||0,t0=performance.now();function s(t){const p=Math.min(1,(t-t0)/450),e=1-Math.pow(1-p,3),v=from+(to-from)*e;el.textContent=fmt(v);if(p<1)requestAnimationFrame(s);else el._c=to;}requestAnimationFrame(s);}
+function render(){const m=calc(P);av(document.getElementById('kRev'),m.rev[4],money);av(document.getElementById('kEb'),m.eb[4],money);av(document.getElementById('kEv'),m.EV,v=>'£'+v.toFixed(1)+'m');av(document.getElementById('kRet'),m.ret,v=>v.toFixed(1)+'×');
+ document.getElementById('kRevM').textContent='Y1 '+money(m.rev[0]);document.getElementById('kEbM').textContent=m.be?('breakeven · Year '+m.be):'scaling';
+ document.getElementById('mixNote').textContent='Platform = '+Math.round(m.platPct*100)+'% of Year-5 revenue (mini-leagues, club leagues, marketplace, licensing). '+(MODE==='global'?'Global content audience + worldwide players + licensed territories.':'UK show + UK platform activation.');
+ drawRev(m);drawEb(m);}
+function drawRev(m){const svg=document.getElementById('revChart'),W=720,H=280,pad=40,bw=66,gap=(W-pad-16-bw*5)/4,max=Math.max(...m.rev)*1.12;const segs=[['ad','#43E0FF'],['spon','#C7F23D'],['tick','#E8B931'],['merch','#8A7CFF'],['plat','#F45D8C']];let h='';
+ for(let g=0;g<=4;g++){const y=H-pad-(H-pad-22)*(g/4);h+=`<line x1="${pad}" y1="${y}" x2="${W-8}" y2="${y}" stroke="rgba(255,255,255,.06)"/><text x="${pad-6}" y="${y+3}" text-anchor="end" class="ylab">${Math.round(max*g/4)}</text>`;}
+ m.Y.forEach(i=>{const x=pad+8+i*(bw+gap);let ya=H-pad;segs.forEach(([k,c])=>{const hh=(H-pad-22)*(m[k][i]/max);ya-=hh;h+=`<rect class="bx" x="${x}" y="${ya}" width="${bw}" height="${hh}" fill="${c}" rx="2"/>`;});h+=`<text x="${x+bw/2}" y="${ya-6}" text-anchor="middle" class="barval">${money(m.rev[i])}</text><text x="${x+bw/2}" y="${H-pad+15}" text-anchor="middle" class="axlab">Y${i+1}</text>`;});svg.innerHTML=h;}
+function drawEb(m){const svg=document.getElementById('ebChart'),W=720,H=170,pad=40,bw=66,gap=(W-pad-16-bw*5)/4,vals=m.eb,max=Math.max(...vals,0)*1.15||1,min=Math.min(...vals,0)*1.15,span=max-min,zero=H-22-(H-22-8)*((0-min)/span);
+ let h=`<line x1="${pad}" y1="${zero}" x2="${W-8}" y2="${zero}" stroke="rgba(255,255,255,.18)"/><text x="${pad-6}" y="${zero+3}" text-anchor="end" class="ylab">0</text>`;
+ m.Y.forEach(i=>{const x=pad+8+i*(bw+gap),v=vals[i],y=H-22-(H-22-8)*((v-min)/span),top=Math.min(y,zero),hh=Math.abs(y-zero),c=v>=0?'#C7F23D':'#F45D8C';h+=`<rect class="bx" x="${x}" y="${top}" width="${bw}" height="${hh}" fill="${c}" rx="2"/><text x="${x+bw/2}" y="${v>=0?top-5:top+hh+13}" text-anchor="middle" class="barval" fill="${c}">${money(v)}</text><text x="${x+bw/2}" y="${H-3}" text-anchor="middle" class="axlab">Y${i+1}</text>`;});svg.innerHTML=h;}
+function buildSliders(){const w=document.getElementById('sliders');w.innerHTML='';SL.forEach(s=>{const d=document.createElement('div');d.className='sld';d.innerHTML=`<div class="r"><span class="n">${s.n}</span><span class="vv" id="v_${s.k}">${s.f(P[s.k])}</span></div><input type="range" min="${s.min}" max="${s.max}" step="${s.step}" value="${P[s.k]}" id="s_${s.k}">`;w.appendChild(d);d.querySelector('input').addEventListener('input',e=>{P[s.k]=parseFloat(e.target.value);document.getElementById('v_'+s.k).textContent=s.f(P[s.k]);render();});});}
+function sync(){SL.forEach(s=>{const i=document.getElementById('s_'+s.k);if(i){i.value=P[s.k];document.getElementById('v_'+s.k).textContent=s.f(P[s.k]);}});}
+function setS(m){MODE=m;P=Object.assign({},m==='uk'?P_UK:P_GL);document.getElementById('bUK').classList.toggle('on',m==='uk');document.getElementById('bGl').classList.toggle('on',m==='global');sync();render();}
+buildSliders();render();
+</script>
+</body></html>

@@ -12,14 +12,13 @@
     --bg:#0A0B0D; --bg2:#101216; --card:#15181E; --card2:#1B1F26;
     --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.18);
     --volt:#C7F23D; --white:#F4F6F2; --dim:#878E99; --dim2:#5A616B; --danger:#ff5a5f;
-    --label:'Archivo',system-ui,sans-serif;
+    --label:'Archivo',system-ui,sans-serif; --bar:58px;
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{background:var(--bg)}
   body{background:transparent;color:var(--white);font-family:'Space Grotesk',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.55;min-height:100vh}
   .bgvid{position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
   .bgscrim{position:fixed;inset:0;background:rgba(8,9,11,.82);z-index:-1}
-  .wrap{max-width:760px;margin:0 auto;padding:0 22px}
   .mono{width:42px;height:42px;border-radius:50%;background:var(--volt);display:flex;align-items:center;justify-content:center;font-family:var(--label);font-weight:900;font-style:italic;color:#0A0B0D;font-size:25px;flex:none}
   .eyebrow{font-family:var(--label);font-weight:800;font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--volt)}
   .crown{width:46px;height:42px;color:var(--volt);display:block;margin:0 auto 14px}
@@ -41,34 +40,42 @@
   .err{color:var(--danger);font-size:13px;margin-top:12px;min-height:0}
   .foot{color:var(--dim2);font-size:11px;letter-spacing:.08em;margin-top:18px}
 
-  /* docs (revealed) */
-  .docs{display:none;padding:30px 0 70px}
-  .topbar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:26px}
-  .brand{display:flex;align-items:center;gap:11px}
-  .brand .wm{font-family:var(--label);font-weight:900;font-style:italic;font-size:17px}
+  /* viewer (revealed) */
+  .docs{display:none}
+  .vbar{position:fixed;top:0;left:0;right:0;height:var(--bar);z-index:30;display:flex;align-items:center;justify-content:space-between;gap:14px;
+        padding:0 18px;background:rgba(10,11,13,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:10px;flex:none}
+  .brand .mono{width:32px;height:32px;font-size:19px}
+  .brand .wm{font-family:var(--label);font-weight:900;font-style:italic;font-size:15px;white-space:nowrap}
   .brand .wm i{color:var(--volt)}
-  .conf{font-family:var(--label);font-weight:800;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--danger);border:1px solid rgba(255,90,95,.4);border-radius:999px;padding:5px 11px}
-  .docintro{margin-bottom:22px}
-  .docintro h2{font-family:'Anton';font-size:clamp(26px,5vw,40px);text-transform:uppercase;line-height:1}
-  .docintro p{color:var(--dim);font-size:14px;margin-top:8px}
-  .dcard{display:flex;align-items:center;gap:16px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:14px;transition:border-color .15s}
-  .dcard:hover{border-color:var(--line2)}
-  .dnum{font-family:'Anton';font-size:30px;color:var(--volt);line-height:1;width:34px;flex:none}
-  .dmeta{flex:1;min-width:0}
-  .dmeta .t{font-family:var(--label);font-weight:900;font-style:italic;text-transform:uppercase;font-size:18px}
-  .dmeta .d{color:var(--dim);font-size:13.5px;margin-top:3px}
-  .dacts{display:flex;gap:8px;flex:none}
-  .da{font-family:var(--label);font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border-radius:10px;padding:10px 14px;cursor:pointer;text-decoration:none;border:1.5px solid transparent}
-  .da.v{background:var(--volt);color:#0A0B0D}
-  .da.d{background:transparent;color:var(--white);border-color:var(--line2)}
-  .da.d:hover{border-color:var(--volt);color:var(--volt)}
-  .reminder{color:var(--dim2);font-size:12px;text-align:center;margin-top:24px;border-top:1px solid var(--line);padding-top:20px}
-  @media(max-width:560px){.dcard{flex-wrap:wrap}.dacts{width:100%}.da{flex:1;text-align:center}}
+  .tabs{display:flex;gap:4px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:100px;padding:4px;overflow:auto;-ms-overflow-style:none;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{font-family:var(--label);font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim);
+       background:transparent;border:0;border-radius:100px;padding:8px 15px;cursor:pointer;white-space:nowrap;transition:.15s}
+  .tab:hover{color:var(--white)}
+  .tab.on{background:var(--volt);color:#0A0B0D}
+  .conf{font-family:var(--label);font-weight:800;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--danger);border:1px solid rgba(255,90,95,.4);border-radius:999px;padding:5px 11px;flex:none}
+  .viewer{position:fixed;top:var(--bar);left:0;right:0;bottom:0;overflow:hidden;background:var(--bg)}
+  .pane{position:absolute;inset:0;display:none}
+  .pane.on{display:block}
+  .screens{position:absolute;inset:0;overflow-y:auto;padding:26px 16px 60px;text-align:center;-webkit-overflow-scrolling:touch}
+  .screens img{display:block;width:100%;max-width:1120px;margin:0 auto 16px;border-radius:8px;box-shadow:0 14px 40px rgba(0,0,0,.55);background:#15181E;-webkit-user-drag:none}
+  .pane iframe{width:100%;height:100%;border:0;display:block;background:var(--bg)}
+  .vwm{position:absolute;inset:0;pointer-events:none;z-index:20;display:none}
+  .endnote{color:var(--dim2);font-size:12px;max-width:1120px;margin:6px auto 0;padding-top:18px;border-top:1px solid var(--line)}
+  @media(max-width:680px){
+    :root{--bar:54px}
+    .vbar{padding:0 12px;gap:8px}
+    .brand .wm{display:none}
+    .tab{padding:7px 11px;font-size:11px}
+    .conf{display:none}
+  }
 </style>
 </head>
-<body>
+<body oncontextmenu="return false">
 <video class="bgvid" autoplay muted loop playsinline preload="auto"><source src="hero.mp4" type="video/mp4"></video>
 <div class="bgscrim"></div>
+
   <!-- GATE -->
   <div class="gate" id="gate">
     <div class="lock">
@@ -87,20 +94,24 @@
     </div>
   </div>
 
-  <!-- DOCS (revealed after unlock) -->
+  <!-- VIEWER (revealed after unlock) -->
   <div class="docs" id="docs">
-    <div class="wrap">
-      <div class="topbar">
-        <span class="brand"><span class="mono">K</span><span class="wm">KOURT<i>KING</i></span></span>
-        <span class="conf">Confidential</span>
+    <div class="vbar">
+      <span class="brand"><span class="mono">K</span><span class="wm">KOURT<i>KING</i></span></span>
+      <div class="tabs">
+        <button class="tab on" data-pane="creative" onclick="tab('creative')">Creative</button>
+        <button class="tab" data-pane="format" onclick="tab('format')">The Format</button>
+        <button class="tab" data-pane="invest" onclick="tab('invest')">Investment</button>
       </div>
-      <div class="docintro">
-        <div class="eyebrow">Shared in confidence</div>
-        <h2>The materials</h2>
-        <p id="sharedWith"></p>
+      <span class="conf">Confidential</span>
+    </div>
+    <div class="viewer">
+      <div class="pane on" id="pane-creative">
+        <div class="screens" id="creativeScreens"></div>
       </div>
-      <div id="docList"></div>
-      <div class="reminder">These documents are confidential and were shared with you personally. Please don't forward or distribute them.</div>
+      <div class="pane" id="pane-format"><iframe id="if-format" title="The Format" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
+      <div class="pane" id="pane-invest"><iframe id="if-invest" title="Investment Case" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
+      <div class="vwm" id="vwm"></div>
     </div>
   </div>
 
@@ -116,11 +127,10 @@
 
   document.getElementById("crownHolder").innerHTML='<svg viewBox="0 0 24 22" fill="currentColor" aria-hidden="true"><path d="M3 7L7 11 12 4 17 11 21 7 19.4 19.5 4.6 19.5Z"/></svg>';
 
-  const DOCS=[
-    {t:"Creative Deck", d:"The vision, the show and the brand.", href:"vault/creative-deck.pdf", view:"View", dl:"creative-deck.pdf"},
-    {t:"The Format", d:"How it works — the run of show, the game & The 20.", href:"vault/playbook.html", view:"Open", dl:null},
-    {t:"Financials Deck", d:"The numbers, the raise and the return.", href:"vault/financials-deck.pdf", view:"View", dl:"financials-deck.pdf"}
-  ];
+  // Creative deck = page images (view-only, no download). Update if the deck's page count changes.
+  const CREATIVE_PAGES=11;
+  const IFRAME_SRC={ format:"vault/format.html", invest:"vault/investment.html" };
+  const loaded={};
 
   async function sha256(str){
     const buf=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
@@ -141,20 +151,37 @@
     if(!ok){ err.textContent="That access code isn't right."; btn.disabled=false; btn.textContent="Unlock documents"; return; }
     // record the access (fire-and-forget; never blocks entry)
     try{ if(sb) sb.from("doc_access").insert({ email:email, agreed:true }); }catch(e){}
-    try{ sessionStorage.setItem("kk_vault_email", email); }catch(e){}
+    try{ localStorage.setItem("kk_vault_email", email); }catch(e){}
     reveal(email);
+  }
+
+  function buildWatermark(email){
+    var t=(email+"   ·   CONFIDENTIAL").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    var svg='<svg xmlns="http://www.w3.org/2000/svg" width="440" height="240"><text x="12" y="130" transform="rotate(-26 12 130)" fill="rgba(255,255,255,0.11)" font-family="Archivo,Arial,sans-serif" font-size="15" font-weight="700">'+t+'</text></svg>';
+    document.getElementById("vwm").style.background='url("data:image/svg+xml;utf8,'+encodeURIComponent(svg)+'") repeat';
   }
 
   function reveal(email){
     document.getElementById("gate").style.display="none";
-    document.getElementById("sharedWith").textContent="Shared with "+email+". For your eyes only.";
-    document.getElementById("docList").innerHTML=DOCS.map(function(x,i){
-      var acts='<a class="da v" href="'+x.href+'" target="_blank" rel="noopener">'+x.view+' ↗</a>';
-      if(x.dl) acts+='<a class="da d" href="'+x.href+'" download="KourtKing-'+x.dl+'">Download</a>';
-      return '<div class="dcard"><div class="dnum">'+(i+1)+'</div><div class="dmeta"><div class="t">'+x.t+'</div><div class="d">'+x.d+'</div></div><div class="dacts">'+acts+'</div></div>';
-    }).join("");
+    // build creative page-image scroll
+    var html="";
+    for(var i=1;i<=CREATIVE_PAGES;i++){ html+='<img src="vault/creative/p'+String(i).padStart(3,"0")+'.jpg" alt="" draggable="false" loading="lazy">'; }
+    html+='<div class="endnote">Confidential · shared with '+email.replace(/</g,"&lt;")+' · do not distribute.</div>';
+    document.getElementById("creativeScreens").innerHTML=html;
+    buildWatermark(email);
     document.getElementById("docs").style.display="block";
+    tab("creative");
     window.scrollTo(0,0);
+  }
+
+  function tab(name){
+    // lazy-load the iframe docs on first open
+    if(IFRAME_SRC[name] && !loaded[name]){ document.getElementById("if-"+name).src=IFRAME_SRC[name]; loaded[name]=true; }
+    document.querySelectorAll(".tab").forEach(function(b){ b.classList.toggle("on", b.getAttribute("data-pane")===name); });
+    document.querySelectorAll(".pane").forEach(function(p){ p.classList.remove("on"); });
+    document.getElementById("pane-"+name).classList.add("on");
+    // parent watermark only over the creative image pane (the iframe docs carry their own)
+    document.getElementById("vwm").style.display = (name==="creative") ? "block" : "none";
   }
 
   // allow Enter key to submit
