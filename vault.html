@@ -109,7 +109,7 @@
       <div class="pane on" id="pane-creative">
         <div class="screens" id="creativeScreens"></div>
       </div>
-      <div class="pane" id="pane-format"><div class="screens" id="formatScreens"></div></div>
+      <div class="pane" id="pane-format"><iframe id="if-format" title="The Format" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
       <div class="pane" id="pane-invest"><iframe id="if-invest" title="Investment Case" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
     </div>
   </div>
@@ -128,8 +128,7 @@
 
   // Creative & Format decks = page images (view-only, no download). Update if page counts change.
   const CREATIVE_PAGES=11;
-  const FORMAT_PAGES=14;
-  const IFRAME_SRC={ invest:"vault/investment.html" };
+  const IFRAME_SRC={ format:"vault/format.html", invest:"vault/investment.html" };
   const loaded={};
 
   async function sha256(str){
@@ -164,7 +163,6 @@
   function reveal(email){
     document.getElementById("gate").style.display="none";
     document.getElementById("creativeScreens").innerHTML=pageImgs("vault/creative",CREATIVE_PAGES);
-    document.getElementById("formatScreens").innerHTML=pageImgs("vault/format",FORMAT_PAGES);
     document.getElementById("docs").style.display="block";
     tab("creative");
     window.scrollTo(0,0);
