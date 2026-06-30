@@ -34,6 +34,9 @@
   .gate .mono{margin:0 auto 18px;width:54px;height:54px;font-size:30px}
   .gate h1{font-family:'Anton';font-size:30px;text-transform:uppercase;margin-bottom:10px}
   .gate p{color:var(--dim);margin-bottom:20px}
+  .gate input{width:100%;background:var(--card2);border:1px solid var(--line2);color:var(--white);border-radius:12px;padding:14px 15px;font-size:16px;font-family:inherit;outline:none;margin-bottom:12px;text-align:left}
+  .gate input:focus{border-color:var(--volt)}
+  .gerr{color:var(--danger);font-size:13px;margin-top:12px;min-height:1px}
 
   .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:var(--label);font-weight:800;font-size:13px;letter-spacing:.05em;text-transform:uppercase;border-radius:12px;padding:13px 20px;cursor:pointer;border:1.5px solid transparent;transition:.15s;text-decoration:none}
   .btn.volt{background:var(--volt);color:#0A0B0D}
@@ -150,20 +153,43 @@ const DATA=[{"cat": "brands", "n": "Red Bull", "h": "energy / owns events", "r":
 
   function PLAY(){return '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 8l6 4-6 4z"/></svg>';}
 
-  async function boot(){
-    if(!sb){ gate("Can't reach the server.", ""); return; }
-    var s=null; try{ s=(await sb.auth.getSession()).data.session; }catch(e){}
-    me = s && s.user ? s.user : null;
-    if(!me){ return gate("Sign in to continue", '<p>Sign in to the KOURT app first, then come back here.</p><a class="btn volt" href="app.html">Open the KOURT app →</a>'); }
-    if(ADMINS.indexOf((me.email||"").toLowerCase())<0){ return gate("Not authorised", '<p>'+esc(me.email||"")+' doesn\'t have access to the command desk.</p><a class="btn ghost" href="app.html">Back to the app</a>'); }
-    $("who").innerHTML = esc(me.email)+' · <a onclick="signOut()">Sign out</a>';
+  // Shared team gate: email + access code (SHA-256 of "kourtkingadmin"). A light lock, like the vault.
+  const CODE_HASH="84a67bd39f31746c441dd911b7a9442341dba51d15920fae0b9a9f6165d54f59";
+  async function sha256(str){ var b=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)); return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,"0");}).join(""); }
+
+  function boot(){
+    var saved=null, ok=false;
+    try{ saved=localStorage.getItem("kk_admin_email"); ok=localStorage.getItem("kk_admin_ok")==="1"; }catch(e){}
+    if(ok && saved){ me={email:saved}; return enter(); }
+    showGate();
+  }
+  function showGate(){
+    $("who").innerHTML="";
+    $("view").innerHTML='<div class="gate"><div class="mono">K</div><h1>Command Desk</h1>'
+      +'<p>Team access only — enter your email and the access code.</p>'
+      +'<input id="gemail" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com">'
+      +'<input id="gcode" type="password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Access code">'
+      +'<button class="btn volt" id="gbtn" style="width:100%" onclick="unlock()">Enter the desk</button>'
+      +'<div class="gerr" id="gerr"></div></div>';
+    var c=$("gcode"); if(c) c.addEventListener("keydown",function(e){ if(e.key==="Enter") unlock(); });
+  }
+  async function unlock(){
+    var email=(($("gemail")||{}).value||"").trim().toLowerCase();
+    var code=(($("gcode")||{}).value||"").trim().toLowerCase();
+    var err=$("gerr"); if(err) err.textContent="";
+    if(!/^.+@.+\..+$/.test(email)){ if(err) err.textContent="Enter a valid email."; return; }
+    if(!code){ if(err) err.textContent="Enter the access code."; return; }
+    var btn=$("gbtn"); if(btn){ btn.disabled=true; btn.textContent="Checking…"; }
+    var pass=false; try{ pass=(await sha256(code))===CODE_HASH; }catch(e){}
+    if(!pass){ if(err) err.textContent="That access code isn't right."; if(btn){ btn.disabled=false; btn.textContent="Enter the desk"; } return; }
+    try{ localStorage.setItem("kk_admin_email",email); localStorage.setItem("kk_admin_ok","1"); }catch(e){}
+    me={email:email}; enter();
+  }
+  async function enter(){
+    $("who").innerHTML=esc(me.email)+' · <a onclick="signOut()">Sign out</a>';
     await loadData();
   }
-  function gate(title, body){
-    $("who").innerHTML="";
-    $("view").innerHTML='<div class="gate"><div class="mono">K</div><h1>'+esc(title)+'</h1>'+body+'</div>';
-  }
-  async function signOut(){ try{ await sb.auth.signOut(); }catch(e){} location.reload(); }
+  function signOut(){ try{ localStorage.removeItem("kk_admin_ok"); }catch(e){} location.reload(); }
 
   async function loadData(){
     $("view").innerHTML='<div class="wrap"><div class="empty" style="margin-top:40px">Loading the desk…</div></div>';
