@@ -55,6 +55,9 @@
   .tab:hover{color:var(--white)}
   .tab.on{background:var(--volt);color:#0A0B0D}
   .conf{font-family:var(--label);font-weight:800;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--danger);border:1px solid rgba(255,90,95,.4);border-radius:999px;padding:5px 11px;flex:none}
+  .vright{display:flex;align-items:center;gap:10px;flex:none}
+  .dlpack{font-family:var(--label);font-weight:800;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:#0A0B0D;background:var(--volt);border-radius:100px;padding:8px 14px;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+  .dlpack:hover{filter:brightness(1.07)}
   .viewer{position:fixed;top:var(--bar);left:0;right:0;bottom:0;overflow:hidden;background:var(--bg)}
   .pane{position:absolute;inset:0;display:none}
   .pane.on{display:block}
@@ -103,7 +106,7 @@
         <button class="tab" data-pane="format" onclick="tab('format')">The Format</button>
         <button class="tab" data-pane="invest" onclick="tab('invest')">Investment</button>
       </div>
-      <span class="conf">Confidential</span>
+      <a class="dlpack" href="vault/kourt-king-pack.pdf" download="Kourt King Pack.pdf">⤓ Download pack</a>
     </div>
     <div class="viewer">
       <div class="pane on" id="pane-creative">
